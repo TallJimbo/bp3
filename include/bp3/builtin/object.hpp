@@ -7,7 +7,6 @@
 
 #define BP3_OBJECT_STANDARD_API(cls, base)                              \
     explicit cls(py_ptr const & ptr) : base(ptr) { require_isinstance(*this, cls::type()); } \
-    explicit cls(object const & other) : base(other) { require_isinstance(*this, cls::type()); } \
     cls(cls const & other) : base(other) {}
 
 namespace bp3 { namespace builtin {
@@ -52,23 +51,50 @@ public:
     }
 };
 
-class str : public object {
+class bytes : public object {
 public:
 
-    str() : object(py_ptr::steal(PyBytes_FromString(""))) {}
+    bytes();
 
-    BP3_OBJECT_STANDARD_API(str, object)
+    explicit bytes(object const & obj);
 
-    operator std::string () const { return PyBytes_AS_STRING(_ptr.get()); }
+    explicit bytes(char const * s);
 
-    char const * c_str() const { return PyBytes_AS_STRING(_ptr.get()); }
+    explicit bytes(std::string const & s);
+    
+    BP3_OBJECT_STANDARD_API(bytes, object)
+
+    operator std::string () const;
+
+    char const * c_str() const;
 
     static object type() {
         return object(py_ptr::borrow(reinterpret_cast<py_ptr::element_type*>(&PyBytes_Type)));
     }
 };
 
-typedef str bytes;
+class unicode : public object {
+public:
+
+    BP3_OBJECT_STANDARD_API(unicode, object)
+
+    explicit unicode(object const & obj);
+
+    explicit unicode(char const * s);
+
+    explicit unicode(std::string const & s);
+
+    static object type() {
+        return object(py_ptr::borrow(reinterpret_cast<py_ptr::element_type*>(&PyUnicode_Type)));
+    }
+
+};
+
+#if PY_MAJOR_VERSION == 2
+typedef bytes str;
+#else
+typedef unicode str;
+#endif
 
 str repr(object const & obj);
 

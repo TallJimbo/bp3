@@ -28,6 +28,36 @@ bool isinstance(object const & inst, object const & cls) {
     return r;
 }
 
+bytes::bytes() : object(py_ptr::steal(PyBytes_FromString(""))) {}
+
+bytes::bytes(object const & obj) :
+    object(py_ptr::steal(PyObject_Bytes(obj.ptr().get())).raise_if_null()) {}
+
+bytes::bytes(char const * s) :
+    object(py_ptr::steal(PyBytes_FromString(s))) {}
+
+bytes::bytes(std::string const & s) :
+    object(py_ptr::steal(PyBytes_FromStringAndSize(s.data(), s.size()))) {}
+
+bytes::operator std::string () const { return PyBytes_AS_STRING(_ptr.get()); }
+
+char const * bytes::c_str() const { return PyBytes_AS_STRING(_ptr.get()); }
+
+unicode::unicode(object const & obj) :
+    object(py_ptr::steal(
+#if PY_MAJOR_VERSION == 2               
+               PyObject_Unicode
+#else
+               PyObject_Str
+#endif
+               (obj.ptr().get())).raise_if_null()) {}
+
+unicode::unicode(char const * s) :
+    object(py_ptr::steal(PyUnicode_FromString(s))) {}
+
+unicode::unicode(std::string const & s) : 
+    object(py_ptr::steal(PyUnicode_FromStringAndSize(s.data(), s.size()))) {}
+
 str repr(object const & obj) {
     return str(py_ptr::steal(PyObject_Repr(obj.ptr().get())).raise_if_null());
 }
