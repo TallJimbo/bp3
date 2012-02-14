@@ -43,6 +43,20 @@ static PyMethodDef methods[] = {
     {0, 0, 0, 0}
 };
 
+#if PY_MAJOR_VERSION != 2
+static PyModuleDef module = {
+    PyModuleDef_HEAD_INIT,
+    "example",
+    0,
+    0,
+    methods
+};
+#endif
+
 PyMODINIT_FUNC initexample() {
+#if PY_MAJOR_VERSION == 2
     PyObject * m = Py_InitModule("example", methods);
+#else
+    PyObject * m = PyModule_Create(&module);
+#endif
 }

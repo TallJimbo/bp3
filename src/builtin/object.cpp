@@ -37,8 +37,8 @@ void require_isinstance(object const & inst, object const & cls) {
     if (!isinstance(inst, cls)) {
         py_ptr ps1 = py_ptr::steal(PyObject_Repr(inst.ptr().get())).raise_if_null();
         py_ptr ps2 = py_ptr::steal(PyObject_Repr(cls.ptr().get())).raise_if_null();
-        char const * s1 = PyString_AsString(ps1.get()); if (!s1) throw_error_already_set();
-        char const * s2 = PyString_AsString(ps2.get()); if (!s2) throw_error_already_set();
+        char const * s1 = PyBytes_AsString(ps1.get()); if (!s1) throw_error_already_set();
+        char const * s2 = PyBytes_AsString(ps2.get()); if (!s2) throw_error_already_set();
         TypeError::raise(s1 + message + s2);
     }
 }

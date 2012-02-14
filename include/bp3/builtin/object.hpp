@@ -55,16 +55,16 @@ public:
 class str : public object {
 public:
 
-    str() : object(py_ptr::steal(PyString_FromString(""))) {}
+    str() : object(py_ptr::steal(PyBytes_FromString(""))) {}
 
     BP3_OBJECT_STANDARD_API(str, object)
 
-    operator std::string () const { return PyString_AS_STRING(_ptr.get()); }
+    operator std::string () const { return PyBytes_AS_STRING(_ptr.get()); }
 
-    char const * c_str() const { return PyString_AS_STRING(_ptr.get()); }
+    char const * c_str() const { return PyBytes_AS_STRING(_ptr.get()); }
 
     static object type() {
-        return object(py_ptr::borrow(reinterpret_cast<py_ptr::element_type*>(&PyString_Type)));
+        return object(py_ptr::borrow(reinterpret_cast<py_ptr::element_type*>(&PyBytes_Type)));
     }
 };
 

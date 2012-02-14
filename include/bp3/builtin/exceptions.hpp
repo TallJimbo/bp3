@@ -44,12 +44,19 @@ protected:
     py_ptr _traceback;
 };
 
+#if PY_MAJOR_VERSION == 2
 BP3_BUILTIN_EXCEPTION(StandardError, Exception);
+#else 
+#define StandardError Exception
+#endif
 BP3_BUILTIN_EXCEPTION(SystemError, StandardError);
 BP3_BUILTIN_EXCEPTION(TypeError, StandardError);
 
 }} // namespace bp3::builtin
 
 #undef BP3_BUILTIN_EXCEPTION
+#if PY_MAJOR_VERSION != 2
+#undef StandardError
+#endif
 
 #endif // !BP3_BUILTIN_exceptions_hpp_INCLUDED

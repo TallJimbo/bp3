@@ -94,7 +94,11 @@ struct factory : public factory_base {
 
 factory_base * factory_base::root() {
     static factory<Exception> fException;
+#if PY_MAJOR_VERSION == 2
     static factory<StandardError> fStandardError(&fException);
+#else
+    factory_base & fStandardError = fException;
+#endif
     static factory<SystemError> fSystemError(&fStandardError);
     static factory<TypeError> fTypeError(&fStandardError);
     return &fException;
