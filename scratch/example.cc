@@ -22,6 +22,10 @@ public:
 
 PyObject * run(PyObject *, PyObject *) {
 
+    auto k = bp3::kwds(bp3::arg("a")=4, "b", "c", bp3::arg("d")=5.3);
+
+    std::cerr << k << std::endl;
+
     FuncN func4 = { 4 };
 
     auto f1 = bp3::def(&Example::func1);
