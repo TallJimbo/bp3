@@ -108,17 +108,19 @@ factory_base * factory_base::root() {
 
 } // namespace exceptions
 
-void throw_error_already_set() {
-    py_ptr type = py_ptr::borrow(PyErr_Occurred());
-    if (!type) {
-        SystemError::raise("C++ exception throw requested with no Python exception set.");
-    }
-    exceptions::factory_base::search(type)->fetch_and_throw();
-}
-
 void Exception::raise_impl(std::string const & what, object const & type) {
     PyErr_SetString(type.ptr().get(), what.c_str());
     throw_error_already_set();
 }
 
-}} // namespace bp3::builtin
+} // namespace builtin
+
+void throw_error_already_set() {
+    py_ptr type = py_ptr::borrow(PyErr_Occurred());
+    if (!type) {
+        builtin::SystemError::raise("C++ exception throw requested with no Python exception set.");
+    }
+    builtin::exceptions::factory_base::search(type)->fetch_and_throw();
+}
+
+} // namespace bp3

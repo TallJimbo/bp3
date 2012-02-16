@@ -26,6 +26,11 @@ PyObject * run(PyObject *, PyObject *) {
 
     std::cerr << k << std::endl;
 
+    for (char const * name : k.get_names()) {
+        std::cerr << "'" << name << "', ";
+    }
+    std::cerr << std::endl;
+
     FuncN func4 = { 4 };
 
     auto f1 = bp3::def(&Example::func1);

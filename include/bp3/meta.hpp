@@ -29,15 +29,14 @@ struct for_each {};
 template <typename V, typename ...E>
 struct for_each<V,E...> {
     template <typename F>
-    static void apply(F && f) {
-        f.template apply<V>();
-        for_each<E...>::apply(std::forward<F>(f));
+    static bool apply(F && f) {
+        return f.template apply<V>() && for_each<E...>::apply(std::forward<F>(f));
     }
 };
 
 template <>
 struct for_each<> {
-    template <typename F> static void apply(F && f) {};
+    template <typename F> static bool apply(F && f) { return true; };
 };
 
 template <typename ...E>
@@ -68,28 +67,24 @@ struct transform {
     typedef typename transform_impl<E...>::template apply<F>::type type;
 };
 
-template <std::size_t I, typename T, std::size_t N=std::tuple_size<T>::value-1>
-struct call_on_tuple {
+template <std::size_t N,std::size_t I=0>
+struct for_each_n_impl {
     template <typename F>
-    static void apply(F && f, T const & t) {
-        f(std::get<I>(t));
-        call_on_tuple<I+1,T>::apply(f, t);
-    }    
-};
-
-template <std::size_t I, typename T>
-struct call_on_tuple<I,T,I> {
-    template <typename F>
-    static void apply(F && f, T const & t) {
-        f(std::get<I>(t));
+    static bool apply(F && f) {
+        return f.apply<I>() && for_each_n_impl<N,I+1>::apply(f);
     }
 };
 
-template <typename F, typename T>
-void for_each_item(F && f, T const & t) {
-    call_on_tuple<0,T>::apply(f, t);
-}
+template <std::size_t N>
+struct for_each_n_impl<N,N> {
+    template <typename F>
+    static bool apply(F && f) { return true; }
+};
 
+template <std::size_t N, typename F>
+bool for_each_n(F && f) {
+    return for_each_n_impl<N>::apply(f);
+}
 
 } // namespace meta
 } // namespace bp3
