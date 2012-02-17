@@ -18,6 +18,14 @@ bytes::operator std::string () const { return PyBytes_AS_STRING(ptr().get()); }
 
 char const * bytes::c_str() const { return PyBytes_AS_STRING(ptr().get()); }
 
+#if PY_MAJOR_VERSION == 2
+bytes bytes::operator%(tuple const & args) const {
+    return bytes(py_ptr::steal(PyString_Format(ptr().get(), args.ptr().get())));
+}
+#endif
+
+
+
 unicode::unicode() : base(py_ptr::steal(PyUnicode_FromString(""))) {}
 
 unicode::unicode(object const & obj) :
@@ -38,6 +46,12 @@ unicode::unicode(std::string const & s) :
 unicode::operator std::string () const {
     return bytes(py_ptr::steal(PyUnicode_AsUTF8String(ptr().get())));
 }
+
+unicode unicode::operator%(tuple const & args) const {
+    return unicode(py_ptr::steal(PyUnicode_Format(ptr().get(), args.ptr().get())));
+}
+
+
 
 str repr(object const & obj) {
     return str(py_ptr::steal(PyObject_Repr(obj.ptr().get())).raise_if_null());

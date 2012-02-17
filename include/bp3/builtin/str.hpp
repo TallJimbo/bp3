@@ -26,6 +26,10 @@ public:
 
     char const * c_str() const;
 
+#if PY_MAJOR_VERSION == 2
+    bytes operator%(tuple const & t) const;
+#endif
+
 };
 
 class unicode : public detail::builtin_object_base<&PyUnicode_Type> {
@@ -45,6 +49,8 @@ public:
     explicit unicode(std::string const & s);
 
     operator std::string () const;
+
+    unicode operator%(tuple const & t) const;
 
 };
 
