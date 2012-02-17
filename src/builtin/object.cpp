@@ -14,6 +14,21 @@ py_ptr const & py_ptr::raise_if_null() const {
     return *this;
 }
 
+py_ptr const & py_ptr::raise_if_not_isinstance(py_ptr const & cls) const {
+    static std::string message = " is not an instance of ";
+    raise_if_null();
+    int r = PyObject_IsInstance(this->get(), cls.get());
+    if (r < 0) throw_error_already_set();
+    if (r == 0) {
+        py_ptr ps1 = py_ptr::steal(PyObject_Repr(this->get())).raise_if_null();
+        py_ptr ps2 = py_ptr::steal(PyObject_Repr(cls.get())).raise_if_null();
+        // FIXME: probably won't work with Python 3.x
+        char const * s1 = PyBytes_AsString(ps1.get()); if (!s1) throw_error_already_set();
+        char const * s2 = PyBytes_AsString(ps2.get()); if (!s2) throw_error_already_set();
+        builtin::TypeError::raise(s1 + message + s2);
+    }
+}
+
 namespace builtin {
 
 Py_ssize_t len(object const & obj) {
@@ -28,49 +43,15 @@ bool isinstance(object const & inst, object const & cls) {
     return r;
 }
 
-bytes::bytes() : object(py_ptr::steal(PyBytes_FromString(""))) {}
-
-bytes::bytes(object const & obj) :
-    object(py_ptr::steal(PyObject_Bytes(obj.ptr().get())).raise_if_null()) {}
-
-bytes::bytes(char const * s) :
-    object(py_ptr::steal(PyBytes_FromString(s))) {}
-
-bytes::bytes(std::string const & s) :
-    object(py_ptr::steal(PyBytes_FromStringAndSize(s.data(), s.size()))) {}
-
-bytes::operator std::string () const { return PyBytes_AS_STRING(_ptr.get()); }
-
-char const * bytes::c_str() const { return PyBytes_AS_STRING(_ptr.get()); }
-
-unicode::unicode(object const & obj) :
-    object(py_ptr::steal(
-#if PY_MAJOR_VERSION == 2               
-               PyObject_Unicode
-#else
-               PyObject_Str
-#endif
-               (obj.ptr().get())).raise_if_null()) {}
-
-unicode::unicode(char const * s) :
-    object(py_ptr::steal(PyUnicode_FromString(s))) {}
-
-unicode::unicode(std::string const & s) : 
-    object(py_ptr::steal(PyUnicode_FromStringAndSize(s.data(), s.size()))) {}
-
-str repr(object const & obj) {
-    return str(py_ptr::steal(PyObject_Repr(obj.ptr().get())).raise_if_null());
-}
-
-void require_isinstance(object const & inst, object const & cls) {
-    static std::string message = " is not an instance of ";
-    if (!isinstance(inst, cls)) {
-        py_ptr ps1 = py_ptr::steal(PyObject_Repr(inst.ptr().get())).raise_if_null();
-        py_ptr ps2 = py_ptr::steal(PyObject_Repr(cls.ptr().get())).raise_if_null();
-        char const * s1 = PyBytes_AsString(ps1.get()); if (!s1) throw_error_already_set();
-        char const * s2 = PyBytes_AsString(ps2.get()); if (!s2) throw_error_already_set();
-        TypeError::raise(s1 + message + s2);
-    }
-}
+type::type(object const & name, object const & bases, object const & dict) :
+    _obj(
+        py_ptr::steal(
+            PyObject_CallFunctionObjArgs(
+                reinterpret_cast<PyObject*>(&PyType_Type),
+                name.ptr().get(), bases.ptr().get(), dict.ptr().get(), nullptr
+            )
+        )
+    )
+{}
 
 }} // namespace bp3::builtin

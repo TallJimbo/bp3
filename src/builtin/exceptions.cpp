@@ -3,9 +3,9 @@
 
 namespace bp3 { namespace builtin {
 
-namespace exceptions {
+namespace detail {
 
-class access {
+class exception_access {
 public:
     
     template <typename ExceptionT>
@@ -27,27 +27,27 @@ namespace {
 
 enum MatchEnum { NONE, EXACT, DERIVED };
 
-struct factory_base {
+struct exception_factory_base {
 
-    static factory_base * root();
+    static exception_factory_base * root();
 
-    static factory_base * search(py_ptr const & type);
+    static exception_factory_base * search(py_ptr const & type);
 
     virtual MatchEnum match(py_ptr const & type) const = 0;
 
     virtual void fetch_and_throw() const = 0;
 
-    virtual ~factory_base() {}
+    virtual ~exception_factory_base() {}
 
-    explicit factory_base() : sibling(nullptr), derived(nullptr) {}
+    explicit exception_factory_base() : sibling(nullptr), derived(nullptr) {}
 
-    factory_base * sibling;
-    factory_base * derived;
+    exception_factory_base * sibling;
+    exception_factory_base * derived;
 };
 
-factory_base * factory_base::search(py_ptr const & target) {
-    factory_base * current = root();
-    factory_base * best = current;
+exception_factory_base * exception_factory_base::search(py_ptr const & target) {
+    exception_factory_base * current = root();
+    exception_factory_base * best = current;
     while (true) {
         MatchEnum match = current->match(target);
         if (match == EXACT) return current;
@@ -67,22 +67,22 @@ factory_base * factory_base::search(py_ptr const & target) {
 }
 
 template <typename ExceptionT>
-struct factory : public factory_base {
+struct exception_factory : public exception_factory_base {
     
     virtual void fetch_and_throw() const {
-        access::fetch_and_throw<ExceptionT>();
+        exception_access::fetch_and_throw<ExceptionT>();
     }
 
     virtual MatchEnum match(py_ptr const & type) const {
-        if (type.get() == ExceptionT::type().ptr().get()) return EXACT;
-        if (PyObject_IsSubclass(type.get(), ExceptionT::type().ptr().get())) return DERIVED;
+        if (type.get() == ExceptionT::typeobject().ptr().get()) return EXACT;
+        if (PyObject_IsSubclass(type.get(), ExceptionT::typeobject().ptr().get())) return DERIVED;
         return NONE;
     }
 
-    explicit factory(factory_base * base = nullptr) {
+    explicit exception_factory(exception_factory_base * base = nullptr) {
         if (!base) return;
         if (base->derived) {
-            factory_base * c = base->derived;
+            exception_factory_base * c = base->derived;
             while (c->sibling) c = c->sibling;
             c->sibling = this;
         } else {
@@ -92,26 +92,34 @@ struct factory : public factory_base {
 
 };
 
-factory_base * factory_base::root() {
-    static factory<Exception> fException;
+exception_factory_base * exception_factory_base::root() {
+    static exception_factory<Exception> fException;
 #if PY_MAJOR_VERSION == 2
-    static factory<StandardError> fStandardError(&fException);
+    static exception_factory<StandardError> fStandardError(&fException);
 #else
-    factory_base & fStandardError = fException;
+    exception_factory_base & fStandardError = fException;
 #endif
-    static factory<SystemError> fSystemError(&fStandardError);
-    static factory<TypeError> fTypeError(&fStandardError);
+    static exception_factory<SystemError> fSystemError(&fStandardError);
+    static exception_factory<TypeError> fTypeError(&fStandardError);
     return &fException;
 };
 
 } // anonymous
 
-} // namespace exceptions
+} // namespace detail
 
-void Exception::raise_impl(std::string const & what, object const & type) {
-    PyErr_SetString(type.ptr().get(), what.c_str());
-    throw_error_already_set();
-}
+#define BP3_BUILTIN_EXCEPTION_RAISE(cls)        \
+    void cls::raise(std::string const & msg) {  \
+        PyErr_SetString(typeobject().ptr().get(), msg.c_str()); \
+        detail::exception_access::fetch_and_throw<cls>();   \
+    }
+
+BP3_BUILTIN_EXCEPTION_RAISE(Exception)
+#if PY_MAJOR_VERSION == 2
+BP3_BUILTIN_EXCEPTION_RAISE(StandardError)
+#endif
+BP3_BUILTIN_EXCEPTION_RAISE(SystemError)
+BP3_BUILTIN_EXCEPTION_RAISE(TypeError)
 
 } // namespace builtin
 
@@ -120,7 +128,7 @@ void throw_error_already_set() {
     if (!type) {
         builtin::SystemError::raise("C++ exception throw requested with no Python exception set.");
     }
-    builtin::exceptions::factory_base::search(type)->fetch_and_throw();
+    builtin::detail::exception_factory_base::search(type)->fetch_and_throw();
 }
 
 } // namespace bp3

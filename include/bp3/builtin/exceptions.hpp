@@ -6,12 +6,12 @@
 #define BP3_BUILTIN_EXCEPTION(cls, base)                                \
     class cls : public base {                                           \
     public:                                                             \
-    cls(cls const & other) : base(other) {}                             \
-    static object type() { return object(py_ptr::borrow(PyExc_ ##cls)); } \
-    static void raise(std::string const & what) { raise_impl(what, type()); } \
-    protected:                                                            \
-    friend class exceptions::access;                                    \
-    cls(py_ptr const & value, py_ptr const & traceback) : base(value, traceback) {} \
+        cls(cls const & other) : base(other) {}                             \
+        static type typeobject() { return type(py_ptr::borrow(PyExc_ ##cls)); } \
+        static void raise(std::string const & what);                    \
+    protected:                                                          \
+        friend class detail::exception_access;                              \
+        cls(py_ptr const & value, py_ptr const & traceback) : base(value, traceback) {} \
     }
 
 namespace bp3 {
@@ -20,27 +20,32 @@ void throw_error_already_set();
 
 namespace builtin {
 
-namespace exceptions {
+namespace detail {
 
-class access;
+class exception_access;
 
-} // namespace exceptions
+} // namespace detail
 
-class Exception : public object {
+class Exception {
 public:
 
-    static void raise(std::string const & what) { raise_impl(what, type()); }
+    Exception & operator=(Exception const &) = delete;
 
-    static object type() { return object(py_ptr::borrow(PyExc_Exception)); }
+    py_ptr const & ptr() const { return _value.ptr(); }
+
+    operator object const & () const { return _value; }
+
+    static void raise(std::string const & msg);
+
+    static object typeobject() { return type(py_ptr::borrow(PyExc_Exception)); }
 
 protected:
 
-    friend class exceptions::access;
+    friend class detail::exception_access;
 
-    static void raise_impl(std::string const & what, object const & type);
+    Exception(py_ptr const & value, py_ptr const & traceback) : _value(value), _traceback(traceback) {}
 
-    Exception(py_ptr const & value, py_ptr const & traceback) : object(value), _traceback(traceback) {}
-
+    object _value;
     py_ptr _traceback;
 };
 

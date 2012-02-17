@@ -50,6 +50,8 @@ public:
 
     py_ptr const & raise_if_null() const;
 
+    py_ptr const & raise_if_not_isinstance(py_ptr const & cls) const;
+
     static inline py_ptr steal(element_type * p) {
         return py_ptr(p);
     }
