@@ -64,8 +64,8 @@ static PyModuleDef module = {
 
 PyMODINIT_FUNC initexample() {
 #if PY_MAJOR_VERSION == 2
-    PyObject * m = Py_InitModule("example", methods);
+    Py_InitModule("example", methods);
 #else
-    PyObject * m = PyModule_Create(&module);
+    return PyModule_Create(&module);
 #endif
 }

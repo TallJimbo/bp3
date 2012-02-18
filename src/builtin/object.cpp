@@ -20,13 +20,14 @@ py_ptr const & py_ptr::raise_if_not_isinstance(py_ptr const & cls) const {
     int r = PyObject_IsInstance(this->get(), cls.get());
     if (r < 0) throw_error_already_set();
     if (r == 0) {
-        py_ptr ps1 = py_ptr::steal(PyObject_Repr(this->get())).raise_if_null();
-        py_ptr ps2 = py_ptr::steal(PyObject_Repr(cls.get())).raise_if_null();
+        py_ptr ps1 = py_ptr::steal(PyObject_Repr(this->get())); ps1.raise_if_null();
+        py_ptr ps2 = py_ptr::steal(PyObject_Repr(cls.get())); ps2.raise_if_null();
         // FIXME: probably won't work with Python 3.x
         char const * s1 = PyBytes_AsString(ps1.get()); if (!s1) throw_error_already_set();
         char const * s2 = PyBytes_AsString(ps2.get()); if (!s2) throw_error_already_set();
         builtin::TypeError::raise(s1 + message + s2);
     }
+	return *this;
 }
 
 namespace builtin {

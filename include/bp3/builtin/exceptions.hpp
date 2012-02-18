@@ -35,6 +35,8 @@ public:
 
     operator object const & () const { return _value; }
 
+    std::nullptr_t release();
+
     static void raise(std::string const & msg);
 
     static object typeobject() { return type(py_ptr::borrow(PyExc_Exception)); }

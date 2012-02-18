@@ -121,6 +121,11 @@ BP3_BUILTIN_EXCEPTION_RAISE(StandardError)
 BP3_BUILTIN_EXCEPTION_RAISE(SystemError)
 BP3_BUILTIN_EXCEPTION_RAISE(TypeError)
 
+std::nullptr_t Exception::release() {
+    PyErr_Restore(type(_value).ptr().incref(), _value.ptr().incref(), _traceback.incref());
+    return nullptr;
+}
+
 } // namespace builtin
 
 void throw_error_already_set() {

@@ -30,7 +30,8 @@ struct arg_t<no_default> {
     arg_t<T> operator=(T const & value) { return arg_t<T>{name, value}; }
 };
 
-bool start_pack_parse(
+void start_pack_parse(
+    std::string const & function_name,
     char const ** names, std::size_t const len_names,
     py_ptr const & args, py_ptr const & kwds,
     py_ptr * & output, std::size_t const len_output
@@ -78,14 +79,20 @@ class pack {
 
         template <std::size_t I>
         bool apply() {
-            return apply(I, std::get<I>(data));
+            apply(I, std::get<I>(data));
+            return false;
         }
 
         template <typename T>
-        bool apply(std::size_t i, arg_t<T> const &) { return true; }
+        void apply(std::size_t i, arg_t<T> const &) {}
 
-        bool apply(std::size_t i, arg_t<no_default> const &) { return bool(output[i]); }
+        void apply(std::size_t i, arg_t<no_default> const & a) {
+            static std::string const msg1 = "Missing argument '";
+            static std::string const msg2 = "' in call to";
+            if (!output[i]) builtin::TypeError::raise(msg1 + a.name + msg2 + function_name);
+        }
 
+        std::string const & function_name;
         data_t const & data;
         py_ptr * output;
     };
@@ -95,7 +102,8 @@ public:
     explicit pack(E...args) : _data(args...) {}
 
     template <std::size_t N>
-    bool parse(
+    void parse(
+        std::string const & function_name,
         py_ptr const & args, py_ptr const & kwds,
         std::array<py_ptr,N> & output
     ) const {
@@ -109,9 +117,9 @@ public:
         );
         std::array<char const *,size::value> names = get_names();
         py_ptr * output_p = output.data();
-        if (!start_pack_parse(names.data(), size::value, args, kwds, output_p, N)) return false;
-        check_parse_functor f{_data, output_p};
-        return meta::for_each_n<size::value>(f);
+        start_pack_parse(function_name, names.data(), size::value, args, kwds, output_p, N);
+        check_parse_functor f{function_name, _data, output_p};
+        meta::for_each_n<size::value>(f);
     }
 
     friend std::ostream & operator<<(std::ostream & os, pack<E...> const & p) {

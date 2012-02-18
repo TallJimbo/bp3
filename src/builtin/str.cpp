@@ -6,7 +6,7 @@ namespace bp3 {  namespace builtin {
 bytes::bytes() : base(py_ptr::steal(PyBytes_FromString(""))) {}
 
 bytes::bytes(object const & obj) :
-    base(py_ptr::steal(PyObject_Bytes(obj.ptr().get())).raise_if_null()) {}
+    base(py_ptr::steal(PyObject_Bytes(obj.ptr().get()))) {}
 
 bytes::bytes(char const * s) :
     base(py_ptr::steal(PyBytes_FromString(s))) {}
@@ -35,7 +35,7 @@ unicode::unicode(object const & obj) :
 #else
                PyObject_Str
 #endif
-               (obj.ptr().get())).raise_if_null()) {}
+               (obj.ptr().get()))) {}
 
 unicode::unicode(char const * s) :
     base(py_ptr::steal(PyUnicode_FromString(s))) {}
@@ -54,7 +54,7 @@ unicode unicode::operator%(tuple const & args) const {
 
 
 str repr(object const & obj) {
-    return str(py_ptr::steal(PyObject_Repr(obj.ptr().get())).raise_if_null());
+    return str(py_ptr::steal(PyObject_Repr(obj.ptr().get())));
 }
 
 }} // namespace bp3::builtin

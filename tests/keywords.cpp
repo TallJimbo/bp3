@@ -9,19 +9,15 @@ PyObject * test_parser(
     auto key_pack = bp3::kwds("a", "b", bp3::arg("c")=2, bp3::arg("d")=3);
     std::array<bp3::py_ptr,N> output;
     try {
-        if (!key_pack.parse(bp3::py_ptr::borrow(args), bp3::py_ptr::borrow(kwds), output)) {
-            PyErr_SetString(PyExc_ValueError, "Failed to parse arguments.");
-            return nullptr;
-        }
+        key_pack.parse("example()", bp3::py_ptr::borrow(args), bp3::py_ptr::borrow(kwds), output);
     } catch (bp3::builtin::TypeError & err) {
-        PyErr_SetObject(PyExc_TypeError, err.ptr().get());
-        return nullptr;
+        return err.release();
     }
     int offset = N - 4;
     if (!output[2 + offset]) output[2 + offset] = bp3::py_ptr::steal(PyLong_FromLong(2));
     if (!output[3 + offset]) output[3 + offset] = bp3::py_ptr::steal(PyLong_FromLong(3));
     PyObject * r = PyTuple_New(N);
-    for (Py_ssize_t i = 0; i < N; ++i) {
+    for (Py_ssize_t i = 0, n = N; i < n; ++i) {
         PyTuple_SET_ITEM(r, i, output[i].release());
     }
     return r;
@@ -57,7 +53,7 @@ template PyObject * test_parser<5>(PyObject *, PyObject *, PyObject *);
 int main() {
 #if PY_MAJOR_VERSION == 2
     Py_Initialize();
-    PyObject * m = Py_InitModule("keyword_tests", methods);
+    Py_InitModule("keyword_tests", methods);
 #else
     PyImport_AppendInittab("keyword_tests", &PyInit_keyword_tests);
     Py_Initialize();
@@ -78,7 +74,6 @@ int main() {
         "    print('test {0}: {1}'.format(i, results[i]))\n"
         "keyword_tests.result = all(results.values())\n"
     );
-    //bool result = bp3::py_ptr::steal(PyObject_GetAttrString(m, "result")).get() == Py_True;
     Py_Finalize();
-    return 0;//!result;
+    return 0;
 }

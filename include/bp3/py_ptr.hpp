@@ -42,6 +42,11 @@ public:
         return r;
     }
 
+    element_type * incref() const {
+        Py_XINCREF(_p);
+        return _p;
+    }
+
     element_type * get() const { return _p; }
 
     element_type * operator->() const { return _p; }
