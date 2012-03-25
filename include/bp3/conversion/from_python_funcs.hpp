@@ -9,7 +9,7 @@ namespace bp3 { namespace conversion  {
 
 class from_python_funcs {
 public:
-    bool is_rvalue;
+    bool is_lvalue;
     from_python_check_func check;
     from_python_convert_func convert;
     from_python_postcall_func postcall;

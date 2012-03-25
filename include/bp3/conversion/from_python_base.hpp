@@ -8,13 +8,13 @@ namespace bp3 {
 
 class context_t;
 
-namespace conversion  {
-
 class converter_data {
 public:
     void * scratch1;
     void * scratch2;
 };
+
+namespace conversion  {
 
 /*
    The returned int is a penalty that indicates how close this conversion is to an exact match.  We
@@ -66,11 +66,15 @@ class from_python_funcs;
 
 class from_python_base {
 public:
-    
+
     explicit from_python_base(
-        context_t const & context, py_ptr const & py, bp3::type_info const & ti, bool is_rvalue
+        context_t const & context, py_ptr const & py, bp3::type_info const & ti, bool is_lvalue
     );
 
+    from_python_base(from_python_base const &) = delete;
+
+    from_python_base & operator=(from_python_base const &) = delete;
+    
     bool is_convertible() const { return _penalty >= 0; }
 
     int penalty() const { return _penalty; }

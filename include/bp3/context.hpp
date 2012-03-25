@@ -26,20 +26,20 @@ public:
     std::shared_ptr<conversion::registration> lookup(bp3::type_info const & t) const;
 
     void register_from_python(
-        bp3::type_info const & t, bool is_rvalue,
+        bp3::type_info const & t, bool is_lvalue,
         conversion::from_python_check_func check,
         conversion::from_python_convert_func convert,
-        conversion::from_python_postcall_func postcall=nullptr,
+        conversion::from_python_postcall_func postcall,
         conversion::from_python_cleanup_func cleanup=nullptr
     );
 
     void register_from_python(
-        bp3::type_info const & t, bool is_rvalue,
+        bp3::type_info const & t, bool is_lvalue,
         conversion::from_python_check_func check,
         conversion::from_python_convert_func convert,
         conversion::from_python_cleanup_func cleanup=nullptr
     ) {
-        register_from_python(t, is_rvalue, check, convert, nullptr, cleanup);
+        register_from_python(t, is_lvalue, check, convert, nullptr, cleanup);
     }
 
     ~context_t();

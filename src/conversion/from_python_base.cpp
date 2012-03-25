@@ -10,7 +10,7 @@ namespace {
 std::tuple<int,from_python_funcs*,converter_data> find_from_python_converter(
     std::shared_ptr<registration> const & reg,
     py_ptr const & py,
-    bool is_rvalue,
+    bool is_lvalue,
     int inheritance_offset
 ) {
     int best_penalty = -1;
@@ -20,7 +20,7 @@ std::tuple<int,from_python_funcs*,converter_data> find_from_python_converter(
     converter_data current_data;
     for (auto converter_list : reg->from_python) {
         for (from_python_funcs & current_funcs : *converter_list) {
-            if (!is_rvalue && current_funcs.is_rvalue) {
+            if (is_lvalue && !current_funcs.is_lvalue) {
                 continue;
             }
             try {
@@ -60,7 +60,7 @@ std::tuple<int,from_python_funcs*,converter_data> find_from_python_converter(
         // unless it's a complete failure.
         from_python_funcs * current_funcs = nullptr;
         std::tie(current_penalty,current_funcs,current_data) = find_from_python_converter(
-            *iter, py, is_rvalue, inheritance_offset + 1
+            *iter, py, is_lvalue, inheritance_offset + 1
         );
         if (current_penalty < 0) continue;
         if (have_derived_match && best_penalty <= current_penalty) {
@@ -89,11 +89,11 @@ from_python_base::from_python_base(
     context_t const & context,
     py_ptr const & py,
     bp3::type_info const & ti,
-    bool is_rvalue
+    bool is_lvalue
 ) : _py(py), _penalty(-1), _data()
 {
     std::shared_ptr<registration> reg = context.lookup(ti);
-    std::tie(_penalty, _funcs, _data) = find_from_python_converter(reg, py, is_rvalue, 0);
+    std::tie(_penalty, _funcs, _data) = find_from_python_converter(reg, py, is_lvalue, 0);
 }
 
 void * from_python_base::_convert() { return _funcs->convert(_py, _data); }

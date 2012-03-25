@@ -33,7 +33,7 @@ std::shared_ptr<conversion::registration> context_t::lookup(bp3::type_info const
 }
 
 void context_t::register_from_python(
-    bp3::type_info const & t, bool is_rvalue,
+    bp3::type_info const & t, bool is_lvalue,
     conversion::from_python_check_func check,
     conversion::from_python_convert_func convert,
     conversion::from_python_postcall_func postcall,
@@ -45,7 +45,7 @@ void context_t::register_from_python(
     }
     
     reg->from_python.front()->push_front(
-        conversion::from_python_funcs{is_rvalue, check, convert, postcall, cleanup}
+        conversion::from_python_funcs{is_lvalue, check, convert, postcall, cleanup}
     );
 }
 
