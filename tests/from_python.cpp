@@ -1,3 +1,4 @@
+#include "bp3/testutils.hpp"
 #include "bp3/context.hpp"
 #include "bp3/conversion/from_python.hpp"
 
@@ -11,7 +12,6 @@
  */
 
 namespace {
-
 
 class Example1 {
 public:
@@ -41,91 +41,47 @@ private:
     }
 };
 
-static bool test1(bp3::context_t const & context) {
-    bp3::py_ptr py1 = Example1::make("ex1");
-    {
-        bp3::conversion::from_python<Example1> converter(context, py1);
-        if (!converter.is_convertible()) return false;
-        Example1 ex1 = converter.convert();
-        if (ex1.value != "ex1") return false;
-    }
-    {
-        bp3::conversion::from_python<Example1 const> converter(context, py1);
-        if (!converter.is_convertible()) return false;
-        Example1 ex1 = converter.convert();
-        if (ex1.value != "ex1") return false;
-    }
-    {
-        bp3::conversion::from_python<Example1 &> converter(context, py1);
-        if (!converter.is_convertible()) return false;
-        Example1 & ex1 = converter.convert();
-        if (ex1.value != "ex1") return false;
-    }
-    {
-        bp3::conversion::from_python<Example1 const &> converter(context, py1);
-        if (!converter.is_convertible()) return false;
-        Example1 const & ex1 = converter.convert();
-        if (ex1.value != "ex1") return false;
-    }
-    {
-        bp3::conversion::from_python<Example1 *> converter(context, py1);
-        if (!converter.is_convertible()) return false;
-        Example1 * ex1 = converter.convert();
-        if (ex1->value != "ex1") return false;
-    }
-    {
-        bp3::conversion::from_python<Example1 const *> converter(context, py1);
-        if (!converter.is_convertible()) return false;
-        Example1 const * ex1 = converter.convert();
-        if (ex1->value != "ex1") return false;
-    }
-    {
-        bp3::conversion::from_python<Example1 * const> converter(context, py1);
-        if (!converter.is_convertible()) return false;
-        Example1 * ex1 = converter.convert();
-        if (ex1->value != "ex1") return false;
-    }
-    {
-        bp3::conversion::from_python<Example1 const * const> converter(context, py1);
-        if (!converter.is_convertible()) return false;
-        Example1 const * ex1 = converter.convert();
-        if (ex1->value != "ex1") return false;
-    }
-    return true;
-}
+class suite1 : public bp3::test_suite<suite1> {
+public:
 
-static PyMethodDef methods[] = {
-    {0, 0, 0, 0}
+    suite1() : bp3::test_suite<suite1>("from_python_tests_1"), context(), py1(Example1::make("ex1")) {
+        context.register_from_python(
+            bp3::type_id<Example1>(), true, &Example1::check1, &Example1::convert1
+        );
+    }
+
+    template <typename T>
+    void test_rv() {
+        bp3::conversion::from_python<T> converter(context, py1);
+        BP3_TEST(converter.is_convertible());
+        T ex1 = converter.convert();
+        BP3_TEST(ex1.value == "ex1");
+    }
+
+    template <typename T>
+    void test_ptr() {
+        bp3::conversion::from_python<T> converter(context, py1);
+        BP3_TEST(converter.is_convertible());
+        T ex1 = converter.convert();
+        BP3_TEST(ex1->value == "ex1");
+    }
+
+    bp3::context_t context;
+    bp3::py_ptr py1;
+
 };
-
-#if PY_MAJOR_VERSION != 2
-static PyModuleDef module = {
-    PyModuleDef_HEAD_INIT,
-    "from_python_tests",
-    0,
-    0,
-    methods
-};
-static PyObject * PyInit_from_python_tests(void) {
-    return PyModule_Create(&module);
-}
-
-#endif
 
 } // namespace
 
 int main() {
-    int result = true;
-#if PY_MAJOR_VERSION == 2
-    Py_Initialize();
-    Py_InitModule("from_python_tests", methods);
-#else
-    PyImport_AppendInittab("from_python_tests", &PyInit_from_python_tests);
-    Py_Initialize();
-#endif
-    bp3::context_t context;
-    context.register_from_python(bp3::type_id<Example1>(), true, &Example1::check1, &Example1::convert1);
-    result = result && test1(context);
-    Py_Finalize();
-    return !result;
+    return !suite1::run({
+        &suite1::test_rv<Example1>, 
+        &suite1::test_rv<Example1 const>,
+        &suite1::test_rv<Example1 &>,
+        &suite1::test_rv<Example1 const &>,
+        &suite1::test_ptr<Example1 *>,
+        &suite1::test_ptr<Example1 * const>,
+        &suite1::test_ptr<Example1 const *>,
+        &suite1::test_ptr<Example1 const * const>
+    });
 }
