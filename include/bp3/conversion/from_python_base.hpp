@@ -24,41 +24,44 @@ namespace conversion  {
    penalty == 0: Perfect match; this converter should be used, and we can stop searching for others.
    penalty > 0:  Imperfect match; this converter can be used if we can't find a better one.
 
-   When a class has registered derived classes and we have an imperfect, we will also search those
-   derived class registrations for converters until we find a perfect match.  If we don't find a
+   When a class has registered derived classes and we have an imperfect match, we will also search
+   those derived class registrations for converters until we find a perfect match.  If we don't find a
    perfect match, the most-derived imperfect conversion is used, and the number of inheritance
    levels is added to the final penalty used in overload selection.  This allows base class converters
    to simply return 1 when encountering a derived class instance, and the system will determine
    the correct penalty.  Because derived classes are only searched when the base class reports
    and imperfect match, we avoid traversing unnecessary branches of the inheritance tree.
 
-   If the check function throws and exception, the exception will be caught and ignored and the call
+   If the check function throws an exception, the exception will be caught and ignored, and the call
    will be treated as though a negative value was returned; the cleanup function will not be called.
 */
 typedef int (*from_python_check_func)(py_ptr const &, converter_data &);
 
 /*
-   Function that does the conversion; the returned pointer point to an instance of the type the
-   converter was registered with.  The pointer may be allocated by the converter (in either
-   the check function or the convert function), in which case it must be deallocated by
-   the cleanup function, or it may point to memory in the Python object.
+   Function that does the conversion; the returned pointer points to
+   an instance of the type the converter was registered with.  The
+   pointer may be allocated by the converter (in either the check
+   function or the convert function), in which case it must be
+   deallocated by the cleanup function, or it may point to memory in
+   the Python object.
 
-   If the conversion fails, it should use builtin::Exception::raise (or the same member function on an
-   Exception subclass); calling code will ensure the cleanup function (if provided) is called.
+   If the conversion fails, it should use builtin::Exception::raise
+   (or the same member function on an Exception subclass); calling
+   code will ensure the cleanup function (if provided) is called.
 */
 typedef void * (*from_python_convert_func)(py_ptr const &, converter_data &);
 
 /*
-   Postcall is only called if the convert function is also called, and converters are not required
-   to have a postcall function at all.
+   Postcall is only called if the convert function is also called, and
+   converters are not required to have a postcall function at all.
 */
 typedef void (*from_python_postcall_func)(py_ptr const &, converter_data &);
 
 /*
-   Cleanup is called whenever the check function returns a nonzero value.  It must be able to
-   successfully cleanup whether or not the convert function is called, and if it is called,
-   whether or not it succeeds.
-   Cleanup must not throw.
+   Cleanup is called whenever the check function does not throw.  It
+   must be able to successfully cleanup whether or not the convert
+   function is called, and if it is called, whether or not it
+   succeeds.  Cleanup must not throw.
 */
 typedef void (*from_python_cleanup_func)(converter_data &);
 
