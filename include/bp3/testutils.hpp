@@ -84,6 +84,9 @@ public:
             (suite.*func)();
             suite.tearDown();
         }
+        if (suite._status) {
+            std::cerr << "All tests passed." << std::endl;
+        }
         return suite._status;
     }
 
