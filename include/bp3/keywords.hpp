@@ -30,8 +30,6 @@ public:
 class kwds {
 public:
 
-    typedef std::vector<arg>::const_iterator iterator;
-
     kwds(std::initializer_list<arg> args) : _args(args) {}
 
     void parse(
@@ -39,9 +37,6 @@ public:
         py_ptr const & args, py_ptr const & kwds,
         std::vector<py_ptr> & output
     ) const;
-
-    iterator begin() const { return _args.begin(); }
-    iterator end() const { return _args.end(); }
 
 private:
     std::vector<arg> _args;

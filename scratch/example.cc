@@ -22,24 +22,21 @@ public:
 
 PyObject * run(PyObject *, PyObject *) {
 
-    bp3::kwds k = {bp3::arg("a")=4, "b", "c", bp3::arg("d")=5.3};
-
-    for (auto arg : k) {
-        std::cerr << "'" << arg.name << "', ";
-    }
-    std::cerr << std::endl;
-
     FuncN func4 = { 4 };
 
-    auto f1 = bp3::def(&Example::func1);
-    auto f2 = bp3::def(&Example::func2);
-    auto f3 = bp3::def(&func3);
-    auto f4 = bp3::def(std::function<int(Example&,double)>(func4));
+    auto f1 = bp3::def("f1", &Example::func1, {"x"});
+    auto f2 = bp3::def("f2", &Example::func2, {"x"});
+    auto f3 = bp3::def("f3", &func3, {"x"});
+    auto f4 = bp3::def("f4", std::function<int(Example&,double)>(func4), {"x"});
 
-    f1.call();
-    f2.call();
-    f3.call();
-    f4.call();
+    bp3::py_ptr args = bp3::py_ptr::steal(PyTuple_New(1));
+    PyTuple_SET_ITEM(args.get(), 0, PyFloat_FromDouble(3.2));
+    bp3::py_ptr kwargs = bp3::py_ptr::steal(PyDict_New());
+
+    f1.call(args, kwargs);
+    f2.call(args, kwargs);
+    f3.call(args, kwargs);
+    f4.call(args, kwargs);
 
     Py_RETURN_NONE;
 }
