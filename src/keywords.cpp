@@ -3,51 +3,52 @@
 #include <cstring>
 #include <vector>
 
-namespace bp3 { namespace kw {
+namespace bp3 {
 
-void start_pack_parse(
+void kwds::parse(
     std::string const & function_name,
-    char const ** names, std::size_t const len_names,
-    py_ptr const & args, py_ptr const & kwds,
-    py_ptr * & output, std::size_t const len_output
-) {
-    Py_ssize_t const len_args = PyTuple_GET_SIZE(args.get());
-    if (static_cast<std::size_t>(len_args) > len_output) {
+    py_ptr const & pyargs, py_ptr const & pykwds,
+    std::vector<py_ptr> & output
+) const {
+    if (_args.size() <= output.size()) {
+        // too many keyword arguments
+    }
+    if (output.size() <= _args.size() + 1) {
+        // not enough keyword arguments
+    }
+    Py_ssize_t const len_pyargs = PyTuple_GET_SIZE(pyargs.get());
+    if (static_cast<std::size_t>(len_pyargs) > output.size()) {
         builtin::TypeError::raise(
-            function_name + " takes at most " + std::to_string(len_output)
-            + " non-keyword arguments (" + std::to_string(len_args) + " given)"
+            function_name + " takes at most " + std::to_string(output.size())
+            + " non-keyword arguments (" + std::to_string(len_pyargs) + " given)"
         );
     }
-    for (Py_ssize_t i = 0; i < len_args; ++i) {
-        output[i] = py_ptr::borrow(PyTuple_GET_ITEM(args.get(), i));
+    for (Py_ssize_t i = 0; i < len_pyargs; ++i) {
+        output[i] = py_ptr::borrow(PyTuple_GET_ITEM(pyargs.get(), i));
     }
-    if (kwds) {
-        if (len_output > len_names) {
-            // The kw pack doesn't have an entry for 'self', so we offset
-            // the output array by one to align them.
-            // But if we haven't set self yet, we're not going to be able to.
-            if (!output[0]) {
-                builtin::TypeError::raise(
-                    function_name + " takes at least 1 non-keyword argument (0 given)"
-                );
-            }
-            ++output;
+    // The kw pack doesn't have an entry for 'self', so we offset
+    // the output array by one to align them.
+    bool add_self = output.size() > _args.size();
+    if (pykwds) {
+        if (add_self && !output[0]) {
+            // If we haven't set self yet, we're not going to be able to.
+            builtin::TypeError::raise(function_name + " takes at least 1 non-keyword argument (0 given)");
         }
         PyObject * key = nullptr;
         PyObject * value = nullptr;
         Py_ssize_t i = 0;
-        while (PyDict_Next(kwds.get(), &i, &key, &value)) {
+        while (PyDict_Next(pykwds.get(), &i, &key, &value)) {
             std::string key_str = builtin::str(py_ptr::borrow(key));
             bool success = false;
-            for (std::size_t n = 0; n < len_names; ++n) {
-                if (key_str == names[n]) {
-                    if (output[n]) {
+            for (std::size_t n = 0; n < _args.size(); ++n) {
+                if (key_str == _args[n].name) {
+                    if (output[add_self + n]) {
                         builtin::TypeError::raise(
-                            function_name + " got multiple values for keyword argument '" 
-                            + std::string(names[n]) + "'"
+                            function_name + " got multiple values for keyword argument '"
+                            + _args[n].name + "'"
                         );
                     }
-                    output[n] = py_ptr::borrow(value);
+                    output[add_self + n] = py_ptr::borrow(value);
                     success = true;
                     break;
                 }
@@ -59,6 +60,11 @@ void start_pack_parse(
             }
         }
     }
+    for (std::size_t n = 0; n < _args.size(); ++n) {
+        if (!output[add_self + n] && !_args[n].value) {
+            builtin::TypeError::raise("Missing argument '" + _args[n].name + "' in call to " + function_name);
+        }
+    }
 }
 
-}} // namespace bp3::kw
+} // namespace bp3

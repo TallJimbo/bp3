@@ -3,12 +3,21 @@
 
 namespace {
 
+/*
+  Because we might include "self" in the keywords or not, the four
+  kwargs we always define here could refer to a N=4 or N=5 argument
+  function.
+
+  To do the test, we parse the arguments and return an N-element tuple
+  containing the objects we extracted from the keywords.  When then
+  compare those from Python.
+*/
 template <std::size_t N>
 PyObject * test_parser(
     PyObject * self, PyObject * args, PyObject * kwds
 ) {
-    auto key_pack = bp3::kwds("a", "b", bp3::arg("c")=2, bp3::arg("d")=3);
-    std::array<bp3::py_ptr,N> output;
+    bp3::kwds key_pack({"a", "b", bp3::arg("c")=2, bp3::arg("d")=3});
+    std::vector<bp3::py_ptr> output(N);
     try {
         key_pack.parse("example()", bp3::py_ptr::borrow(args), bp3::py_ptr::borrow(kwds), output);
     } catch (bp3::builtin::TypeError & err) {

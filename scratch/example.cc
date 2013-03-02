@@ -22,12 +22,10 @@ public:
 
 PyObject * run(PyObject *, PyObject *) {
 
-    auto k = bp3::kwds(bp3::arg("a")=4, "b", "c", bp3::arg("d")=5.3);
+    bp3::kwds k = {bp3::arg("a")=4, "b", "c", bp3::arg("d")=5.3};
 
-    std::cerr << k << std::endl;
-
-    for (char const * name : k.get_names()) {
-        std::cerr << "'" << name << "', ";
+    for (auto arg : k) {
+        std::cerr << "'" << arg.name << "', ";
     }
     std::cerr << std::endl;
 
