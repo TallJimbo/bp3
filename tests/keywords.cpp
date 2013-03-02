@@ -16,7 +16,7 @@ template <std::size_t N>
 PyObject * test_parser(
     PyObject * self, PyObject * args, PyObject * kwds
 ) {
-    bp3::kwds key_pack({"a", "b", bp3::arg("c")=2, bp3::arg("d")=3});
+    bp3::arg_list key_pack({"a", "b", bp3::arg("c")=2, bp3::arg("d")=3});
     std::vector<bp3::py_ptr> output(N);
     try {
         key_pack.parse("example()", bp3::py_ptr::borrow(args), bp3::py_ptr::borrow(kwds), output);

@@ -23,10 +23,10 @@ public:
 
 protected:
 
-    explicit callable_base(std::string const & name, kwds const & kwargs) : _name(name), _kwargs(kwargs) {}
+    explicit callable_base(std::string const & name, arg_list const & args) : _name(name), _args(args) {}
 
     std::string _name;
-    kwds _kwargs;
+    arg_list _args;
 };
 
 struct print_type {
@@ -45,11 +45,11 @@ public:
 
     virtual void call(py_ptr const & args, py_ptr const & kwds) const {
         std::vector<py_ptr> unpacked_args;
-        _kwargs.parse(_name, args, kwds, unpacked_args);
+        _args.parse(_name, args, kwds, unpacked_args);
     }
 
-    callable(std::string const & name, std::function<Result(Args...)> const & func, kwds const & kwargs) :
-        callable_base(name, kwargs), _func(func)
+    callable(std::string const & name, std::function<Result(Args...)> const & func, arg_list const & args) :
+        callable_base(name, args), _func(func)
     {}
 
 private:
@@ -60,36 +60,36 @@ template <typename Result, typename ...Args>
 callable<Result, Args...> def(
     std::string const & name,
     Result func(Args...),
-    kwds const & kwargs
+    arg_list const & args
 ) {
-    return callable<Result, Args...>(name, func, kwargs);
+    return callable<Result, Args...>(name, func, args);
 }
 
 template <typename Result, typename Class, typename ...Args>
 callable<Result, Class &, Args...> def(
     std::string const & name,
     Result (Class::*func)(Args...),
-    kwds const & kwargs
+    arg_list const & args
 ) {
-    return callable<Result, Class &, Args...>(name, func, kwargs);
+    return callable<Result, Class &, Args...>(name, func, args);
 }
 
 template <typename Result, typename Class, typename ...Args>
 callable<Result, Class const &, Args...> def(
     std::string const & name,
     Result (Class::*func)(Args...) const,
-    kwds const & kwargs
+    arg_list const & args
 ) {
-    return callable<Result, Class const &, Args...>(name, func, kwargs);
+    return callable<Result, Class const &, Args...>(name, func, args);
 }
 
 template <typename Result, typename ...Args>
 callable<Result, Args...> def(
     std::string const & name,
     std::function<Result(Args...)> func,
-    kwds const & kwargs
+    arg_list const & args
 ) {
-    return callable<Result, Args...>(name, func, kwargs);
+    return callable<Result, Args...>(name, func, args);
 }
 
 } // namespace bp3

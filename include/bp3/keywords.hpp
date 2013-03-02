@@ -27,19 +27,19 @@ public:
     arg operator=(T v) { return arg{name, v}; }
 };
 
-class kwds {
+class arg_list {
 public:
 
-    kwds(std::initializer_list<arg> args) : _args(args) {}
+    arg_list(std::initializer_list<arg> x) : _vec(x) {}
 
     void parse(
         std::string const & function_name,
-        py_ptr const & args, py_ptr const & kwds,
+        py_ptr const & args, py_ptr const & arg_list,
         std::vector<py_ptr> & output
     ) const;
 
 private:
-    std::vector<arg> _args;
+    std::vector<arg> _vec;
 };
 
 } // namespace bp3
