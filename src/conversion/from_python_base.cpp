@@ -18,6 +18,7 @@ std::tuple<int,from_python_funcs*,converter_data> find_from_python_converter(
     from_python_funcs * best_funcs = nullptr;
     converter_data best_data;
     converter_data current_data;
+    assert(reg);
     for (auto converter_list : reg->from_python) {
         for (from_python_funcs & current_funcs : *converter_list) {
             if (is_lvalue && !current_funcs.is_lvalue) {
@@ -90,10 +91,12 @@ from_python_base::from_python_base(
     py_ptr const & py,
     bp3::type_info const & ti,
     bool is_lvalue
-) : _py(py), _penalty(-1), _data()
+) : _py(py), _penalty(-1), _data(), _funcs(nullptr)
 {
     std::shared_ptr<registration> reg = context.lookup(ti);
-    std::tie(_penalty, _funcs, _data) = find_from_python_converter(reg, py, is_lvalue, 0);
+    if (reg) {
+        std::tie(_penalty, _funcs, _data) = find_from_python_converter(reg, py, is_lvalue, 0);
+    }
 }
 
 void * from_python_base::_convert() { return _funcs->convert(_py, _data); }
@@ -101,7 +104,7 @@ void * from_python_base::_convert() { return _funcs->convert(_py, _data); }
 void from_python_base::postcall() { if (_funcs->postcall) _funcs->postcall(_py, _data); }
 
 from_python_base::~from_python_base() {
-    if (_funcs->cleanup) _funcs->cleanup(_data);
+    if (_funcs && _funcs->cleanup) _funcs->cleanup(_data);
 }
 
 }} // namespace bp3::conversion
