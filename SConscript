@@ -11,12 +11,21 @@ env.Append( LINKFLAGS = ["$__RPATH"] )
 
 lib = env.SharedLibrary("lib/bp3", env.Glob("src/*.cpp") + env.Glob("src/*/*.cpp"))
 
-env.SharedLibrary("scratch/example", "scratch/example.cc", SHLIBPREFIX="")
-env.AlwaysBuild("scratch/run.py")
-env.Program("scratch/typeid", "scratch/typeid.cpp")
 
 test_env = env.Clone()
 test_env.Append(LIBPATH=["lib"])
 test_env.Append(LIBS=["bp3"])
 test_env.Program("tests/keywords", "tests/keywords.cpp")
 test_env.Program("tests/from_python", "tests/from_python.cpp")
+test_env.SharedLibrary("scratch/example", "scratch/example.cc", SHLIBPREFIX="")
+test_env.AlwaysBuild("scratch/run.py")
+test_env.Program("scratch/typeid", "scratch/typeid.cpp")
+
+def writeEupsTable(target, source, env):
+    filename = target[0].abspath
+    with open(filename, 'w') as f:
+        f.write("setupRequired(python)\n")
+        f.write("envPrepend(LD_LIBRARY_PATH, ${PRODUCT_DIR}/lib)\n")
+        f.write("envPrepend(PYTHONPATH, ${PRODUCT_DIR}/scratch)\n")
+    return None
+env.Command("ups/bp3.table", None, writeEupsTable)
