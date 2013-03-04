@@ -53,7 +53,7 @@ public:
 template <typename T>
 any::any(T v) : _impl(new impl_t<T>(v)) {}
 
-any::any(any const & other) : _impl(other._impl ? other._impl->clone() : nullptr) {}
+inline any::any(any const & other) : _impl(other._impl ? other._impl->clone() : nullptr) {}
 
 template <typename T>
 T * any::get() {

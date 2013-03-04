@@ -15,7 +15,6 @@ lib = env.SharedLibrary("lib/bp3", env.Glob("src/*.cpp") + env.Glob("src/*/*.cpp
 test_env = env.Clone()
 test_env.Append(LIBPATH=["lib"])
 test_env.Append(LIBS=["bp3"])
-test_env.Program("tests/keywords", "tests/keywords.cpp")
 test_env.Program("tests/from_python", "tests/from_python.cpp")
 test_env.SharedLibrary("scratch/example", "scratch/example.cc", SHLIBPREFIX="")
 test_env.AlwaysBuild("scratch/run.py")

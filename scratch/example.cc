@@ -52,10 +52,10 @@ PyObject * run(PyObject *, PyObject *) {
             Example::check, Example::convert
         );
 
-        auto f1 = bp3::def(context, "f1", &Example::func1, {"x"});
-        auto f2 = bp3::def(context, "f2", &Example::func2, {"x"});
-        auto f3 = bp3::def(context, "f3", &func3, {"x"});
-        auto f4 = bp3::def(context, "f4", std::function<int(Example&,double)>(func4), {"x"});
+        auto f1 = bp3::callable(context, "f1", &Example::func1, {"x"});
+        auto f2 = bp3::callable(context, "f2", &Example::func2, {"x"});
+        auto f3 = bp3::callable(context, "f3", &func3, {"x"});
+        auto f4 = bp3::callable(context, "f4", std::function<int(Example&,double)>(func4), {"x"});
 
         bp3::py_ptr args = bp3::py_ptr::steal(PyTuple_New(2));
         PyTuple_SET_ITEM(args.get(), 0, Example::make().release());

@@ -32,11 +32,14 @@ public:
 
     arg_list(std::initializer_list<arg> x) : _vec(x) {}
 
-    void parse(
+    bool parse(
         std::string const & function_name,
         py_ptr const & args, py_ptr const & arg_list,
-        std::vector<py_ptr> & output
+        std::vector<py_ptr> & output,
+        bool throw_on_failure=true
     ) const;
+
+    void validate(std::size_t n_args);
 
 private:
     std::vector<arg> _vec;
