@@ -32,6 +32,12 @@ py_ptr const & py_ptr::raise_if_not_isinstance(py_ptr const & cls) const {
 
 namespace builtin {
 
+type::type(object const & obj) : _obj(py_ptr::steal(PyObject_Type(obj.ptr().get()))) {}
+
+type::type(py_ptr const & ptr) :
+    _obj(ptr.raise_if_not_isinstance(py_ptr::borrow(reinterpret_cast<PyObject*>(&PyType_Type))))
+{}
+
 Py_ssize_t len(object const & obj) {
     Py_ssize_t r = PyObject_Size(obj.ptr().get());
     if (r < 0) throw_error_already_set();

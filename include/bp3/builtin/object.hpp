@@ -27,9 +27,9 @@ public:
 
     type(object const & name, object const & bases, object const & dict);
 
-    explicit type(object const & obj) : _obj(py_ptr::steal(PyObject_Type(obj.ptr().get()))) {}
+    explicit type(object const & obj);
 
-    type(py_ptr const & ptr) : _obj(ptr.raise_if_not_isinstance(typeobject().ptr())) {}
+    type(py_ptr const & ptr);
 
     py_ptr const & ptr() const { return _obj.ptr(); }
 
