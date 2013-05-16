@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(bp3)
 
+enable_testing()
+
 add_subdirectory(cmake)
 
 set(LIBRARY_TYPE SHARED)
@@ -11,3 +13,4 @@ include_directories(
 )
 
 add_subdirectory(lib)
+add_subdirectory(tests)
