@@ -41,47 +41,60 @@ private:
     }
 };
 
-class suite1 : public bp3::test_suite<suite1> {
-public:
+static bp3::context_t context;
 
-    suite1() : bp3::test_suite<suite1>("from_python_tests_1"), context(), py1(Example1::make("ex1")) {
-        context.register_from_python(
-            bp3::type_id<Example1>(), true, &Example1::check1, &Example1::convert1
-        );
+template <typename T>
+static PyObject * check_rv(PyObject * self, PyObject * arg) {
+    bp3::py_ptr py1 = bp3::py_ptr::borrow(arg);
+    bp3::conversion::from_python<T> converter(context, py1);
+    if (!converter.is_convertible()) {
+        Py_RETURN_FALSE;
     }
-
-    template <typename T>
-    void test_rv() {
-        bp3::conversion::from_python<T> converter(context, py1);
-        BP3_TEST(converter.is_convertible());
-        T ex1 = converter.convert();
-        BP3_TEST(ex1.value == "ex1");
+    T ex1 = converter.convert();
+    if (ex1.value != "ex1") {
+        Py_RETURN_FALSE;
     }
+    Py_RETURN_TRUE;
+}
 
-    template <typename T>
-    void test_ptr() {
-        bp3::conversion::from_python<T> converter(context, py1);
-        BP3_TEST(converter.is_convertible());
-        T ex1 = converter.convert();
-        BP3_TEST(ex1->value == "ex1");
+template <typename T>
+static PyObject * check_ptr(PyObject * self, PyObject * arg) {
+    bp3::py_ptr py1 = bp3::py_ptr::borrow(arg);
+    bp3::conversion::from_python<T> converter(context, py1);
+    if (!converter.is_convertible()) {
+        Py_RETURN_FALSE;
     }
-
-    bp3::context_t context;
-    bp3::py_ptr py1;
-
-};
+    T ex1 = converter.convert();
+    if (ex1->value != "ex1") {
+        Py_RETURN_FALSE;
+    }
+    Py_RETURN_TRUE;
+}
 
 } // namespace
 
-int main() {
-    return !suite1::run({
-        &suite1::test_rv<Example1>, 
-        &suite1::test_rv<Example1 const>,
-        &suite1::test_rv<Example1 &>,
-        &suite1::test_rv<Example1 const &>,
-        &suite1::test_ptr<Example1 *>,
-        &suite1::test_ptr<Example1 * const>,
-        &suite1::test_ptr<Example1 const *>,
-        &suite1::test_ptr<Example1 const * const>
-    });
+static PyMethodDef methods[] = {
+    {"check_val", &check_rv<Example1>, METH_O, ""},
+    {"check_cval", &check_rv<Example1 const>, METH_O, ""},
+    {"check_ref", &check_rv<Example1 &>, METH_O, ""},
+    {"check_cref", &check_rv<Example1 const &>, METH_O, ""},
+    {"check_ptr", &check_ptr<Example1*>, METH_O, ""},
+    {"check_cptr", &check_ptr<Example1 const *>, METH_O, ""},
+    {"check_ptrc", &check_ptr<Example1 * const>, METH_O, ""},
+    {"check_cptrc", &check_ptr<Example1 const * const>, METH_O, ""},
+    {NULL, NULL, 0, NULL}
+};
+
+PyMODINIT_FUNC
+initfrom_python_test_mod() {
+    PyObject * module = Py_InitModule("from_python_test_mod", methods);
+
+    if (!module) return;
+
+    context.register_from_python(
+        bp3::type_id<Example1>(), true, &Example1::check1, &Example1::convert1
+    );
+
+    bp3::py_ptr py1 = Example1::make("ex1");
+    PyModule_AddObject(module, "py1", py1.release());
 }
