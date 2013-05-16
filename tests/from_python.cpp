@@ -73,27 +73,50 @@ static PyObject * check_ptr(PyObject * self, PyObject * arg) {
 } // namespace
 
 static PyMethodDef methods[] = {
-    {"check_val", &check_rv<Example1>, METH_O, ""},
-    {"check_cval", &check_rv<Example1 const>, METH_O, ""},
-    {"check_ref", &check_rv<Example1 &>, METH_O, ""},
-    {"check_cref", &check_rv<Example1 const &>, METH_O, ""},
-    {"check_ptr", &check_ptr<Example1*>, METH_O, ""},
-    {"check_cptr", &check_ptr<Example1 const *>, METH_O, ""},
-    {"check_ptrc", &check_ptr<Example1 * const>, METH_O, ""},
-    {"check_cptrc", &check_ptr<Example1 const * const>, METH_O, ""},
-    {NULL, NULL, 0, NULL}
+    {"check_val", &check_rv<Example1>, METH_O, nullptr},
+    {"check_cval", &check_rv<Example1 const>, METH_O, nullptr},
+    {"check_ref", &check_rv<Example1 &>, METH_O, nullptr},
+    {"check_cref", &check_rv<Example1 const &>, METH_O, nullptr},
+    {"check_ptr", &check_ptr<Example1*>, METH_O, nullptr},
+    {"check_cptr", &check_ptr<Example1 const *>, METH_O, nullptr},
+    {"check_ptrc", &check_ptr<Example1 * const>, METH_O, nullptr},
+    {"check_cptrc", &check_ptr<Example1 const * const>, METH_O, nullptr},
+    {nullptr, nullptr, 0, nullptr}
 };
+
+#if PY_MAJOR_VERSION == 2
 
 PyMODINIT_FUNC
 initfrom_python_mod() {
-    PyObject * module = Py_InitModule("from_python_mod", methods);
+    PyObject * m = Py_InitModule("from_python_mod", methods);
 
-    if (!module) return;
+    if (!m) return;
 
     context.register_from_python(
         bp3::type_id<Example1>(), true, &Example1::check1, &Example1::convert1
     );
-
-    bp3::py_ptr py1 = Example1::make("ex1");
-    PyModule_AddObject(module, "py1", py1.release());
+    PyModule_AddObject(m, "py1", Example1::make("ex1").release());
 }
+
+#else
+
+static PyModuleDef module = {
+    PyModuleDef_HEAD_INIT,
+    "from_python_mod",
+    nullptr,
+    -1,
+    methods
+};
+
+PyMODINIT_FUNC
+PyInit_from_python_mod() {
+    PyObject * m = PyModule_Create(&module);
+    if (!m) return m;
+    context.register_from_python(
+        bp3::type_id<Example1>(), true, &Example1::check1, &Example1::convert1
+    );
+    PyModule_AddObject(m, "py1", Example1::make("ex1").release());
+    return m;
+}
+
+#endif
