@@ -1,5 +1,0 @@
-#!/bin/bash
-
-export LD_LIBRARY_PATH=build/$1/lib
-
-./build/$1/tests/$2

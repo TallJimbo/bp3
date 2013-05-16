@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8.3)
 
 add_library(bp3 ${LIBRARY_TYPE}
   # header files
-  ../include/bp3/testutils.hpp
   ../include/bp3/utils/any.hpp
   ../include/bp3/keywords.hpp
   ../include/bp3/callable.hpp
