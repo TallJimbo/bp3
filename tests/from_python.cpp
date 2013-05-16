@@ -85,8 +85,8 @@ static PyMethodDef methods[] = {
 };
 
 PyMODINIT_FUNC
-initfrom_python_test_mod() {
-    PyObject * module = Py_InitModule("from_python_test_mod", methods);
+initfrom_python_mod() {
+    PyObject * module = Py_InitModule("from_python_mod", methods);
 
     if (!module) return;
 
