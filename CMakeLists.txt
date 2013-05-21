@@ -13,4 +13,5 @@ include_directories(
 )
 
 add_subdirectory(lib)
+add_subdirectory(python/bp3)
 add_subdirectory(tests)
