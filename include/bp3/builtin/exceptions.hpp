@@ -26,10 +26,10 @@ class exception_access;
 
 } // namespace detail
 
-class Exception {
+class BaseException {
 public:
 
-    Exception & operator=(Exception const &) = delete;
+    BaseException & operator=(BaseException const &) = delete;
 
     py_ptr const & ptr() const { return _value.ptr(); }
 
@@ -39,31 +39,36 @@ public:
 
     static void raise(std::string const & msg);
 
-    static object typeobject() { return type(py_ptr::borrow(PyExc_Exception)); }
+    static object typeobject() { return type(py_ptr::borrow(PyExc_BaseException)); }
 
 protected:
 
     friend class detail::exception_access;
 
-    Exception(py_ptr const & value, py_ptr const & traceback) : _value(value), _traceback(traceback) {}
+    BaseException(py_ptr const & value, py_ptr const & traceback) : _value(value), _traceback(traceback) {}
 
     object _value;
     py_ptr _traceback;
 };
 
+BP3_BUILTIN_EXCEPTION(Exception, BaseException);
+BP3_BUILTIN_EXCEPTION(StopIteration, Exception);
 #if PY_MAJOR_VERSION == 2
 BP3_BUILTIN_EXCEPTION(StandardError, Exception);
-#else 
-#define StandardError Exception
+#define ERROR_BASE StandardError
+#else
+#define ERROR_BASE Exception
 #endif
-BP3_BUILTIN_EXCEPTION(SystemError, StandardError);
-BP3_BUILTIN_EXCEPTION(TypeError, StandardError);
+BP3_BUILTIN_EXCEPTION(ArithmeticError, ERROR_BASE);
+BP3_BUILTIN_EXCEPTION(FloatingPointError, ArithmeticError);
+BP3_BUILTIN_EXCEPTION(OverflowError, ArithmeticError);
+BP3_BUILTIN_EXCEPTION(ZeroDivisionError, ArithmeticError);
+BP3_BUILTIN_EXCEPTION(SystemError, ERROR_BASE);
+BP3_BUILTIN_EXCEPTION(TypeError, ERROR_BASE);
 
 }} // namespace bp3::builtin
 
 #undef BP3_BUILTIN_EXCEPTION
-#if PY_MAJOR_VERSION != 2
-#undef StandardError
-#endif
+#undef ERROR_BASE
 
 #endif // !BP3_BUILTIN_exceptions_hpp_INCLUDED

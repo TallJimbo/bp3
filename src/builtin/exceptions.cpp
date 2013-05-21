@@ -1,13 +1,24 @@
 #include "bp3/builtin/object.hpp"
 #include "bp3/builtin/exceptions.hpp"
 
+#define BP3_CAT(a, b) a ## b
+
+#define BP3_BUILTIN_EXCEPTION_FACTORY(cls, base)    \
+    static exception_factory<cls> BP3_CAT(f, cls)(BP3_CAT(&f, base))
+
+#define BP3_BUILTIN_EXCEPTION_RAISE(cls)        \
+    void cls::raise(std::string const & msg) {  \
+        PyErr_SetString(typeobject().ptr().get(), msg.c_str()); \
+        detail::exception_access::fetch_and_throw<cls>();   \
+    }
+
 namespace bp3 { namespace builtin {
 
 namespace detail {
 
 class exception_access {
 public:
-    
+
     template <typename ExceptionT>
     static void fetch_and_throw() {
         PyObject* ptype = nullptr;
@@ -68,7 +79,7 @@ exception_factory_base * exception_factory_base::search(py_ptr const & target) {
 
 template <typename ExceptionT>
 struct exception_factory : public exception_factory_base {
-    
+
     virtual void fetch_and_throw() const {
         exception_access::fetch_and_throw<ExceptionT>();
     }
@@ -93,35 +104,41 @@ struct exception_factory : public exception_factory_base {
 };
 
 exception_factory_base * exception_factory_base::root() {
-    static exception_factory<Exception> fException;
+    static exception_factory<BaseException> fBaseException;
+    BP3_BUILTIN_EXCEPTION_FACTORY(Exception, BaseException);
+    BP3_BUILTIN_EXCEPTION_FACTORY(StopIteration, Exception);
 #if PY_MAJOR_VERSION == 2
-    static exception_factory<StandardError> fStandardError(&fException);
+    BP3_BUILTIN_EXCEPTION_FACTORY(StandardError, Exception);
+#define ERROR_BASE StandardError
 #else
-    exception_factory_base & fStandardError = fException;
+#define ERROR_BASE Exception
 #endif
-    static exception_factory<SystemError> fSystemError(&fStandardError);
-    static exception_factory<TypeError> fTypeError(&fStandardError);
-    return &fException;
+    BP3_BUILTIN_EXCEPTION_FACTORY(ArithmeticError, ERROR_BASE);
+    BP3_BUILTIN_EXCEPTION_FACTORY(FloatingPointError, ArithmeticError);
+    BP3_BUILTIN_EXCEPTION_FACTORY(OverflowError, ArithmeticError);
+    BP3_BUILTIN_EXCEPTION_FACTORY(ZeroDivisionError, ArithmeticError);
+    BP3_BUILTIN_EXCEPTION_FACTORY(SystemError, ERROR_BASE);
+    BP3_BUILTIN_EXCEPTION_FACTORY(TypeError, ERROR_BASE);
+    return &fBaseException;
 };
 
 } // anonymous
 
 } // namespace detail
 
-#define BP3_BUILTIN_EXCEPTION_RAISE(cls)        \
-    void cls::raise(std::string const & msg) {  \
-        PyErr_SetString(typeobject().ptr().get(), msg.c_str()); \
-        detail::exception_access::fetch_and_throw<cls>();   \
-    }
-
+BP3_BUILTIN_EXCEPTION_RAISE(BaseException)
 BP3_BUILTIN_EXCEPTION_RAISE(Exception)
 #if PY_MAJOR_VERSION == 2
 BP3_BUILTIN_EXCEPTION_RAISE(StandardError)
 #endif
+BP3_BUILTIN_EXCEPTION_RAISE(ArithmeticError)
+BP3_BUILTIN_EXCEPTION_RAISE(FloatingPointError)
+BP3_BUILTIN_EXCEPTION_RAISE(OverflowError)
+BP3_BUILTIN_EXCEPTION_RAISE(ZeroDivisionError)
 BP3_BUILTIN_EXCEPTION_RAISE(SystemError)
 BP3_BUILTIN_EXCEPTION_RAISE(TypeError)
 
-std::nullptr_t Exception::release() {
+std::nullptr_t BaseException::release() {
     PyErr_Restore(type(_value).ptr().incref(), _value.ptr().incref(), _traceback.incref());
     return nullptr;
 }
@@ -137,3 +154,8 @@ void throw_error_already_set() {
 }
 
 } // namespace bp3
+
+#undef BP3_BUILTIN_EXCEPTION_FACTORY
+#undef BP3_BUILTIN_EXCEPTION_RAISE
+#undef ERROR_BASE
+#undef BP3_CAT
