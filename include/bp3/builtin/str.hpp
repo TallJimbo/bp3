@@ -3,6 +3,7 @@
 
 #include "bp3/py_ptr.hpp"
 #include "bp3/builtin/object.hpp"
+#include "bp3/builtin/sequence.hpp"
 
 #include <string>
 

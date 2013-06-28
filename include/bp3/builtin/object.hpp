@@ -68,22 +68,6 @@ Py_ssize_t len(object const & obj);
 
 bool isinstance(object const & inst, object const & cls);
 
-class tuple : public detail::builtin_object_base<&PyTuple_Type> {
-    typedef detail::builtin_object_base<&PyTuple_Type> base;
-public:
-
-    BP3_BUILTIN_CTOR(tuple) // using base::base;
-
-    tuple() : base(py_ptr::steal(PyTuple_New(0))) {}
-
-    explicit tuple(object const & other) : base(py_ptr::steal(PySequence_Tuple(other.ptr().get()))) {}
-
-    object operator[](Py_ssize_t n) const {
-        return object(py_ptr::borrow(PyTuple_GetItem(ptr().get(), n)));
-    }
-
-};
-
 }} // namespace bp3::builtin
 
 #endif // !BP3_BUILTIN_object_hpp_INCLUDED
