@@ -56,6 +56,18 @@ Py_ssize_t len(object const & obj);
 
 bool isinstance(object const & inst, object const & cls);
 
+object getattr(object const & inst, char const * name);
+
+object getattr(object const & inst, object const & name);
+
+void setattr(object const & inst, char const * name, object const & value);
+
+void setattr(object const & inst, object const & name, object const & value);
+
+void delattr(object const & inst, char const * name);
+
+void delattr(object const & inst, object const & name);
+
 }} // namespace bp3::builtin
 
 #endif // !BP3_BUILTIN_object_hpp_INCLUDED
