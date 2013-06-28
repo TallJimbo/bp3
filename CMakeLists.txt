@@ -44,10 +44,10 @@ add_library(bp3 ${LIBRARY_TYPE}
   include/bp3/builtin.hpp
   include/bp3/meta.hpp
   include/bp3/py_ptr.hpp
-  include/bp3/context.hpp
+  include/bp3/module.hpp
   # source files
   src/callable.cpp
-  src/context.cpp
+  src/module.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/src/builtin/exceptions.cpp
   src/builtin/object.cpp
   src/builtin/numbers.cpp

@@ -14,7 +14,7 @@ struct args_from_python_impl;
 template <std::size_t N>
 struct args_from_python_impl<N> {
 
-    explicit args_from_python_impl(context_t const & context, std::vector<py_ptr> const & py_args) {}
+    explicit args_from_python_impl(module const & mod, std::vector<py_ptr> const & py_args) {}
 
 };
 
@@ -23,8 +23,8 @@ struct args_from_python_impl<N,T,E...> : public args_from_python_impl<N+1,E...> 
     
     typedef args_from_python_impl<N+1,E...> base_t;
 
-    explicit args_from_python_impl(context_t const & context, std::vector<py_ptr> const & py_args) :
-        base_t(context, py_args), _elem(context, py_args[N])
+    explicit args_from_python_impl(module const & mod, std::vector<py_ptr> const & py_args) :
+        base_t(mod, py_args), _elem(mod, py_args[N])
     {}
 
     args_from_python_impl(args_from_python_impl const &) = delete;
@@ -44,8 +44,8 @@ class args_from_python : public detail::args_from_python_impl<0,E...> {
     typedef detail::args_from_python_impl<0,E...> base_t;
 public:
 
-    args_from_python(context_t const & context, std::vector<py_ptr> const & py_args) :
-        base_t(context, py_args)
+    args_from_python(module const & mod, std::vector<py_ptr> const & py_args) :
+        base_t(mod, py_args)
     {}
 
 };

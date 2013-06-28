@@ -1,4 +1,4 @@
-#include "bp3/context.hpp"
+#include "bp3/module.hpp"
 #include "bp3/conversion/from_python.hpp"
 
 #include <string>
@@ -40,12 +40,12 @@ private:
     }
 };
 
-static bp3::context_t context;
+static bp3::module mod;
 
 template <typename T>
 static PyObject * check_rv(PyObject * self, PyObject * arg) {
     bp3::py_ptr py1 = bp3::py_ptr::borrow(arg);
-    bp3::conversion::from_python<T> converter(context, py1);
+    bp3::conversion::from_python<T> converter(mod, py1);
     if (!converter.is_convertible()) {
         Py_RETURN_FALSE;
     }
@@ -59,7 +59,7 @@ static PyObject * check_rv(PyObject * self, PyObject * arg) {
 template <typename T>
 static PyObject * check_ptr(PyObject * self, PyObject * arg) {
     bp3::py_ptr py1 = bp3::py_ptr::borrow(arg);
-    bp3::conversion::from_python<T> converter(context, py1);
+    bp3::conversion::from_python<T> converter(mod, py1);
     if (!converter.is_convertible()) {
         Py_RETURN_FALSE;
     }
@@ -92,7 +92,7 @@ initfrom_python_mod() {
 
     if (!m) return;
 
-    context.register_from_python(
+    mod.register_from_python(
         bp3::type_id<Example1>(), true, &Example1::check1, &Example1::convert1
     );
     PyModule_AddObject(m, "py1", Example1::make("ex1").release());
@@ -112,7 +112,7 @@ PyMODINIT_FUNC
 PyInit_from_python_mod() {
     PyObject * m = PyModule_Create(&module);
     if (!m) return m;
-    context.register_from_python(
+    mod.register_from_python(
         bp3::type_id<Example1>(), true, &Example1::check1, &Example1::convert1
     );
     PyModule_AddObject(m, "py1", Example1::make("ex1").release());

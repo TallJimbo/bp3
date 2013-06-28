@@ -5,7 +5,7 @@
 #include "bp3/meta.hpp"
 #include "bp3/keywords.hpp"
 #include "bp3/conversion/args_from_python.hpp"
-#include "bp3/context.hpp"
+#include "bp3/module.hpp"
 
 #include <functional>
 
@@ -77,15 +77,15 @@ public:
 
     template <typename F>
     callable(
-        context_t const & context, std::string const & name,
+        module const & mod, std::string const & name,
         F func, arg_list kwargs
-    ) : _name(name), _context(&context), _overloads() {
+    ) : _name(name), _mod(&mod), _overloads() {
         add_overload(func, kwargs);
     }
 
 protected:
     std::string _name;
-    context_t const * _context;
+    module const * _mod;
     std::vector<overload_ptr> _overloads;
 };
 

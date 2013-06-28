@@ -1,4 +1,4 @@
-#include "bp3/context.hpp"
+#include "bp3/module.hpp"
 #include "bp3/conversion/from_python_base.hpp"
 #include "bp3/conversion/from_python_funcs.hpp"
 #include "bp3/conversion/registration.hpp"
@@ -87,13 +87,13 @@ std::tuple<int,from_python_funcs*,converter_data> find_from_python_converter(
 } // anonymous
 
 from_python_base::from_python_base(
-    context_t const & context,
+    module const & mod,
     py_ptr const & py,
     bp3::type_info const & ti,
     bool is_lvalue
 ) : _py(py), _penalty(-1), _data(), _funcs(nullptr)
 {
-    std::shared_ptr<registration> reg = context.lookup(ti);
+    std::shared_ptr<registration> reg = mod.lookup(ti);
     if (reg) {
         std::tie(_penalty, _funcs, _data) = find_from_python_converter(reg, py, is_lvalue, 0);
     }

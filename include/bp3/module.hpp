@@ -1,5 +1,5 @@
-#ifndef BP3_context_hpp_INCLUDED
-#define BP3_context_hpp_INCLUDED
+#ifndef BP3_module_hpp_INCLUDED
+#define BP3_module_hpp_INCLUDED
 
 #include "bp3/type_id.hpp"
 #include "bp3/conversion/from_python_base.hpp"
@@ -14,14 +14,14 @@ class registration;
 
 } // namespace conversion
 
-class context_t {
+class module {
 public:
 
-    context_t();
+    module();
 
-    context_t(context_t const &) = delete;
+    module(module const &) = delete;
 
-    context_t & operator=(context_t const &) = delete;
+    module & operator=(module const &) = delete;
 
     std::shared_ptr<conversion::registration> lookup(bp3::type_info const & t) const;
 
@@ -42,15 +42,15 @@ public:
         register_from_python(t, is_lvalue, check, convert, nullptr, cleanup);
     }
 
-    ~context_t();
+    ~module();
 
 private:
 
-    class context_impl;
+    class mod_impl;
 
-    std::unique_ptr<context_impl> _impl;
+    std::unique_ptr<mod_impl> _impl;
 };
 
 } // namespace bp3
 
-#endif // !BP3_context_hpp_INCLUDED
+#endif // !BP3_module_hpp_INCLUDED

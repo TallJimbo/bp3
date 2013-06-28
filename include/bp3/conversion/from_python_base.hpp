@@ -6,7 +6,7 @@
 
 namespace bp3 { 
 
-class context_t;
+class module;
 
 class converter_data {
 public:
@@ -71,7 +71,7 @@ class from_python_base {
 public:
 
     explicit from_python_base(
-        context_t const & context, py_ptr const & py, bp3::type_info const & ti, bool is_lvalue
+        module const & mod, py_ptr const & py, bp3::type_info const & ti, bool is_lvalue
     );
 
     from_python_base(from_python_base const &) = delete;
