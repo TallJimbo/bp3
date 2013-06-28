@@ -22,7 +22,7 @@ protected:
     py_ptr _ptr;
 };
 
-class type {
+class type : public object {
 public:
 
     type(object const & name, object const & bases, object const & dict);
@@ -31,16 +31,10 @@ public:
 
     type(py_ptr const & ptr);
 
-    py_ptr const & ptr() const { return _obj.ptr(); }
-
-    operator object const & () const { return _obj; }
-
     static type typeobject() {
         return type(py_ptr::borrow(reinterpret_cast<PyObject*>(&PyType_Type)));
     }
 
-private:
-    object _obj;
 };
 
 namespace detail {

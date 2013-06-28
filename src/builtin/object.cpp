@@ -1,7 +1,7 @@
 #include "bp3/builtin/object.hpp"
 #include "bp3/builtin/exceptions.hpp"
 
-namespace bp3 { 
+namespace bp3 {
 
 py_ptr const & py_ptr::raise_if_null() const {
     if (!_p) {
@@ -32,10 +32,10 @@ py_ptr const & py_ptr::raise_if_not_isinstance(py_ptr const & cls) const {
 
 namespace builtin {
 
-type::type(object const & obj) : _obj(py_ptr::steal(PyObject_Type(obj.ptr().get()))) {}
+type::type(object const & obj) : object(py_ptr::steal(PyObject_Type(obj.ptr().get()))) {}
 
 type::type(py_ptr const & ptr) :
-    _obj(ptr.raise_if_not_isinstance(py_ptr::borrow(reinterpret_cast<PyObject*>(&PyType_Type))))
+    object(ptr.raise_if_not_isinstance(py_ptr::borrow(reinterpret_cast<PyObject*>(&PyType_Type))))
 {}
 
 Py_ssize_t len(object const & obj) {
@@ -51,7 +51,7 @@ bool isinstance(object const & inst, object const & cls) {
 }
 
 type::type(object const & name, object const & bases, object const & dict) :
-    _obj(
+    object(
         py_ptr::steal(
             PyObject_CallFunctionObjArgs(
                 reinterpret_cast<PyObject*>(&PyType_Type),
