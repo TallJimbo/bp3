@@ -46,20 +46,14 @@ private:
 namespace detail {
 
 template <PyTypeObject * Type>
-class builtin_object_base {
+class builtin_object_base : public object {
 public:
 
     explicit builtin_object_base(py_ptr const & ptr) :
-        _obj(ptr.raise_if_not_isinstance(py_ptr::borrow(reinterpret_cast<PyObject*>(Type)))) {}
-
-    py_ptr const & ptr() const { return _obj.ptr(); }
-
-    operator object const & () const { return _obj; }
+        object(ptr.raise_if_not_isinstance(py_ptr::borrow(reinterpret_cast<PyObject*>(Type)))) {}
 
     static type typeobject() { return type(py_ptr::borrow(reinterpret_cast<PyObject*>(Type))); }
 
-private:
-    object _obj;
 };
 
 } // namespace detail
