@@ -16,7 +16,7 @@ public:
 
     explicit float_(double v);
 
-    operator double () const;
+    explicit operator double () const;
 
 };
 
@@ -32,7 +32,7 @@ public:
 
     explicit int_(long v);
 
-    operator long () const;
+    explicit operator long () const;
 
 };
 
@@ -48,9 +48,9 @@ public:
 
     explicit long_(unsigned long long v);
 
-    operator long long () const;
+    explicit operator long long () const;
 
-    operator unsigned long long () const;
+    explicit operator unsigned long long () const;
 
 };
 
@@ -68,9 +68,9 @@ public:
 
     explicit int_(unsigned long long v);
 
-    operator long long () const;
+    explicit operator long long () const;
 
-    operator unsigned long long () const;
+    explicit operator unsigned long long () const;
 
 };
 
