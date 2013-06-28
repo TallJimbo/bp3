@@ -27,9 +27,9 @@ public:
 
     type(object const & name, object const & bases, object const & dict);
 
-    explicit type(object const & obj);
+    type(object const & obj);
 
-    type(py_ptr const & ptr);
+    explicit type(py_ptr const & ptr);
 
     static type typeobject() {
         return type(py_ptr::borrow(reinterpret_cast<PyObject*>(&PyType_Type)));

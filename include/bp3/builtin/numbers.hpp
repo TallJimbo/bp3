@@ -12,7 +12,7 @@ public:
 
     BP3_BUILTIN_CTOR(float_) // using base::base;
 
-    explicit float_(object const & obj);
+    float_(object const & obj);
 
     explicit float_(double v);
 
@@ -28,7 +28,7 @@ public:
 
     BP3_BUILTIN_CTOR(int_) // using base::base;
 
-    explicit int_(object const & obj);
+    int_(object const & obj);
 
     explicit int_(long v);
 
@@ -42,7 +42,7 @@ public:
 
     BP3_BUILTIN_CTOR(long_) // using base::base;
 
-    explicit long_(object const & obj);
+    long_(object const & obj);
 
     explicit long_(long long v);
 
@@ -62,7 +62,7 @@ public:
 
     BP3_BUILTIN_CTOR(int_) // using base::base;
 
-    explicit int_(object const & obj);
+    int_(object const & obj);
 
     explicit int_(long long v);
 

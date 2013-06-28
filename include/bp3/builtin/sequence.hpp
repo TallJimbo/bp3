@@ -11,6 +11,8 @@ public:
 
     BP3_BUILTIN_CTOR(slice) // using base::base;
 
+    slice(object const & other);
+
     slice(Py_ssize_t start, Py_ssize_t stop);
 
     slice(Py_ssize_t start, Py_ssize_t stop, Py_ssize_t step);
@@ -27,7 +29,7 @@ public:
 
     tuple();
 
-    explicit tuple(object const & other);
+    tuple(object const & other);
 
     object operator[](Py_ssize_t n) const;
 
@@ -45,7 +47,7 @@ public:
 
     list();
 
-    explicit list(object const & other);
+    list(object const & other);
 
     object operator[](Py_ssize_t n) const;
 
