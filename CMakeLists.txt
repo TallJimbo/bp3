@@ -43,7 +43,6 @@ add_library(bp3 ${LIBRARY_TYPE}
   include/bp3/conversion/from_python_base.hpp
   include/bp3/conversion/from_python_funcs.hpp
   include/bp3/builtin.hpp
-  include/bp3/meta.hpp
   include/bp3/py_ptr.hpp
   include/bp3/module.hpp
   # source files
