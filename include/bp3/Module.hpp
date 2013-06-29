@@ -14,8 +14,8 @@
     init ## name() {                                                    \
         PyObject * m = Py_InitModule(#name, methods);                   \
         if (!m) return;                                                 \
-        bp3::Module mod(bp3::PyPtr::borrow(m));                        \
         try {                                                           \
+            bp3::Module mod(#name, bp3::PyPtr::borrow(m));              \
             callback(mod);                                              \
         } catch (bp3::builtin::BaseException & err) {                   \
             err.release();                                              \
@@ -36,8 +36,8 @@
     PyInit_ ## name() {                                                 \
         PyObject * m = PyModule_Create(&_bp3_ ## name ## _module_def);  \
         if (!m) return m;                                               \
-        bp3::Module mod(bp3::PyPtr::borrow(m));                        \
         try {                                                           \
+            bp3::Module mod(#name, bp3::PyPtr::borrow(m));              \
             callback(mod);                                              \
         } catch (bp3::builtin::BaseException & err) {                   \
             err.release();                                              \
@@ -51,11 +51,12 @@
 namespace bp3 {
 
 class Registration;
+class Registry;
 
 class Module {
 public:
 
-    Module(PyPtr const & pymod);
+    Module(char const * name, PyPtr const & pymodule);
 
     void add(std::string const & name, PyPtr const & ptr);
 
@@ -82,8 +83,9 @@ public:
 
 private:
 
-    PyPtr _pymod;
+    PyPtr _pymodule;
     PyPtr _pyregistry;
+    Registry * _registry;
 };
 
 } // namespace bp3

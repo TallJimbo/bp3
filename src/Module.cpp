@@ -20,24 +20,44 @@ RegistryMap & extract(PyPtr const & pyregistry) {
     return *reinterpret_cast<RegistryMap*>(PyCapsule_GetPointer(pyregistry.get(), "bp3.registry"));
 }
 
-void destroyRegistryMap(PyObject * capsule) {
-    RegistryMap * p = reinterpret_cast<RegistryMap*>(PyCapsule_GetPointer(capsule, "bp3.registry"));
-    delete p;
-}
-
 } // anonymous
 
+class Registry {
+public:
+
+    std::string const name;
+    RegistryMap map;
+
+    static Registry * make(char const * module_name, PyPtr const & pymodule, PyPtr & pyregistry) {
+        Registry * p = new Registry(module_name);
+        pyregistry = PyPtr::steal(PyCapsule_New(p, p->name.c_str(), destroy));
+        if (PyModule_AddObject(pymodule.get(), "registry", pyregistry.release()) < 0) {
+            throw_error_already_set();
+        }
+        return p;
+    }
+
+private:
+
+    explicit Registry(char const * module_name) : name(std::string(module_name) + ".registry") {}
+
+    static void destroy(PyObject * capsule) {
+        char const * name = PyCapsule_GetName(capsule);
+        Registry * p = reinterpret_cast<Registry*>(PyCapsule_GetPointer(capsule, name));
+        delete p;
+    }
+};
+
 void Module::add(std::string const & name, PyPtr const & ptr) {
-    if (PyModule_AddObject(_pymod.get(), name.c_str(), ptr.incref()) < 0) {
+    if (PyModule_AddObject(_pymodule.get(), name.c_str(), ptr.incref()) < 0) {
         throw_error_already_set();
     }
 }
 
 std::shared_ptr<Registration> Module::lookup(bp3::TypeInfo const & t) const {
-    RegistryMap & registry = extract(_pyregistry);
-    RegistryMap::const_iterator iter = registry.find(t);
+    RegistryMap::const_iterator iter = _registry->map.find(t);
     std::shared_ptr<Registration> result;
-    if (iter != registry.end()) result = iter->second;
+    if (iter != _registry->map.end()) result = iter->second;
     return result;
 }
 
@@ -48,8 +68,7 @@ void Module::registerFromPython(
     FromPythonPostcallFunc postcall,
     FromPythonCleanupFunc cleanup
 ) {
-    RegistryMap & registry = extract(_pyregistry);
-    std::shared_ptr<Registration> & reg = registry[t];
+    std::shared_ptr<Registration> & reg = _registry->map[t];
     if (!reg) {
         reg = std::make_shared<Registration>();
     }
@@ -58,11 +77,9 @@ void Module::registerFromPython(
     );
 }
 
-Module::Module(PyPtr const & pymod) :
-    _pymod(pymod),
-    _pyregistry(PyPtr::steal(PyCapsule_New(new RegistryMap, "bp3.registry", destroyRegistryMap)))
+Module::Module(char const * name, PyPtr const & pymodule) :
+    _pymodule(pymodule), _registry(Registry::make(name, _pymodule, _pyregistry))
 {
-    PyModule_AddObject(pymod.get(), "registry", _pyregistry.incref());
     // TODO: add default converters
 }
 
