@@ -44,10 +44,10 @@ add_library(bp3 ${LIBRARY_TYPE}
   include/bp3/conversion/from_python_funcs.hpp
   include/bp3/builtin.hpp
   include/bp3/PyPtr.hpp
-  include/bp3/module.hpp
+  include/bp3/Module.hpp
   # source files
   src/callable.cpp
-  src/module.cpp
+  src/Module.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/src/builtin/exceptions.cpp
   src/builtin/object.cpp
   src/builtin/numbers.cpp

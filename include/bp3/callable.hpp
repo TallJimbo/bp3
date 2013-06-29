@@ -4,7 +4,7 @@
 #include "bp3/PyPtr.hpp"
 #include "bp3/keywords.hpp"
 #include "bp3/conversion/args_from_python.hpp"
-#include "bp3/module.hpp"
+#include "bp3/Module.hpp"
 
 #include <functional>
 
@@ -26,7 +26,7 @@ public:
         bool throw_on_failure
     ) const;
 
-    virtual void convert_args(module const & mod, overload_data & data) const = 0;
+    virtual void convert_args(Module const & mod, overload_data & data) const = 0;
 
     virtual void call(overload_data & data) const = 0;
 
@@ -45,7 +45,7 @@ template <typename Result, typename ...Args>
 class overload : public overload_base {
 public:
 
-    virtual void convert_args(module const & mod, overload_data & data) const {
+    virtual void convert_args(Module const & mod, overload_data & data) const {
         data.converted_args.reset(
             new conversion::args_from_python<Args...>(mod, data.unpacked_args)
         );
@@ -99,7 +99,7 @@ public:
 
     template <typename F>
     callable(
-        module const & mod, std::string const & name,
+        Module const & mod, std::string const & name,
         F func, arg_def_list kwargs
     ) : _name(name), _mod(mod), _overloads() {
         add_overload(func, kwargs);
@@ -107,7 +107,7 @@ public:
 
 protected:
     std::string _name;
-    module _mod;
+    Module _mod;
     std::vector<overload_ptr> _overloads;
 };
 

@@ -1,4 +1,4 @@
-#include "bp3/module.hpp"
+#include "bp3/Module.hpp"
 #include "bp3/conversion/from_python_base.hpp"
 #include "bp3/conversion/from_python_funcs.hpp"
 #include "bp3/conversion/registration.hpp"
@@ -87,7 +87,7 @@ std::tuple<int,from_python_funcs*,converter_data> find_from_python_converter(
 } // anonymous
 
 from_python_base::from_python_base(
-    module const & mod,
+    Module const & mod,
     PyPtr const & py,
     bp3::TypeInfo const & ti,
     bool is_lvalue

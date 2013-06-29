@@ -11,7 +11,7 @@ template <typename T>
 class from_python : public from_python_base {
 public:
 
-    explicit from_python(module const & mod, PyPtr const & py) :
+    explicit from_python(Module const & mod, PyPtr const & py) :
         from_python_base(mod, py, makeTypeInfo<T>(), false)
     {}
 
@@ -23,7 +23,7 @@ template <typename T>
 class from_python<T &> : public from_python_base {
 public:
 
-    explicit from_python(module const & mod, PyPtr const & py) :
+    explicit from_python(Module const & mod, PyPtr const & py) :
         from_python_base(mod, py, makeTypeInfo<T>(), std::is_const<T>::value)
     {}
 
@@ -35,7 +35,7 @@ template <typename T>
 class from_python<T *> : public from_python_base {
 public:
 
-    explicit from_python(module const & mod, PyPtr const & py) :
+    explicit from_python(Module const & mod, PyPtr const & py) :
         from_python_base(mod, py, makeTypeInfo<T>(), std::is_const<T>::value)
     {}
 
@@ -47,7 +47,7 @@ template <typename T>
 class from_python<T * const> : public from_python_base {
 public:
 
-    explicit from_python(module const & mod, PyPtr const & py) :
+    explicit from_python(Module const & mod, PyPtr const & py) :
         from_python_base(mod, py, makeTypeInfo<T>(), std::is_const<T>::value)
     {}
 

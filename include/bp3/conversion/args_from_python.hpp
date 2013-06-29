@@ -26,7 +26,7 @@ struct args_from_python_impl;
 template <std::size_t N>
 struct args_from_python_impl<N> : public args_from_python_base {
 
-    explicit args_from_python_impl(module const & mod, std::vector<PyPtr> const & unpacked_args) {}
+    explicit args_from_python_impl(Module const & mod, std::vector<PyPtr> const & unpacked_args) {}
 
 };
 
@@ -35,7 +35,7 @@ struct args_from_python_impl<N,T,E...> : public args_from_python_impl<N+1,E...> 
 
     typedef args_from_python_impl<N+1,E...> base_t;
 
-    explicit args_from_python_impl(module const & mod, std::vector<PyPtr> const & unpacked_args) :
+    explicit args_from_python_impl(Module const & mod, std::vector<PyPtr> const & unpacked_args) :
         base_t(mod, unpacked_args), _elem(mod, unpacked_args[N])
     {
         this->penalty += _elem.penalty();
@@ -51,7 +51,7 @@ class args_from_python : public detail::args_from_python_impl<0,E...> {
     typedef detail::args_from_python_impl<0,E...> base_t;
 public:
 
-    args_from_python(module const & mod, std::vector<PyPtr> const & unpacked_args) :
+    args_from_python(Module const & mod, std::vector<PyPtr> const & unpacked_args) :
         base_t(mod, unpacked_args)
     {}
 

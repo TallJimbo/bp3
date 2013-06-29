@@ -6,7 +6,7 @@
 
 namespace bp3 { 
 
-class module;
+class Module;
 
 class converter_data {
 public:
@@ -71,7 +71,7 @@ class from_python_base {
 public:
 
     explicit from_python_base(
-        module const & mod, PyPtr const & py, bp3::TypeInfo const & ti, bool is_lvalue
+        Module const & mod, PyPtr const & py, bp3::TypeInfo const & ti, bool is_lvalue
     );
 
     from_python_base(from_python_base const &) = delete;

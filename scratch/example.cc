@@ -45,7 +45,7 @@ PyObject * run(PyObject *, PyObject *) {
     try {
         FuncN func4 = { 4 };
 
-        bp3::module mod;
+        bp3::Module mod;
 
         mod.register_from_python(
             bp3::type_id<Example>(), true,

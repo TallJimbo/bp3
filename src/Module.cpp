@@ -1,4 +1,4 @@
-#include "bp3/module.hpp"
+#include "bp3/Module.hpp"
 #include "bp3/conversion/registration.hpp"
 
 #include <cstring>
@@ -27,13 +27,13 @@ void destroy_registry_map(PyObject * capsule) {
 
 } // anonymous
 
-void module::add(std::string const & name, PyPtr const & ptr) {
+void Module::add(std::string const & name, PyPtr const & ptr) {
     if (PyModule_AddObject(_pymod.get(), name.c_str(), ptr.incref()) < 0) {
         throw_error_already_set();
     }
 }
 
-std::shared_ptr<conversion::registration> module::lookup(bp3::TypeInfo const & t) const {
+std::shared_ptr<conversion::registration> Module::lookup(bp3::TypeInfo const & t) const {
     registry_map & registry = extract(_pyregistry);
     registry_map::const_iterator iter = registry.find(t);
     std::shared_ptr<conversion::registration> result;
@@ -41,7 +41,7 @@ std::shared_ptr<conversion::registration> module::lookup(bp3::TypeInfo const & t
     return result;
 }
 
-void module::register_from_python(
+void Module::register_from_python(
     bp3::TypeInfo const & t, bool is_lvalue,
     conversion::from_python_check_func check,
     conversion::from_python_convert_func convert,
@@ -58,7 +58,7 @@ void module::register_from_python(
     );
 }
 
-module::module(PyPtr const & pymod) :
+Module::Module(PyPtr const & pymod) :
     _pymod(pymod),
     _pyregistry(PyPtr::steal(PyCapsule_New(new registry_map, "bp3.registry", destroy_registry_map)))
 {
@@ -66,6 +66,6 @@ module::module(PyPtr const & pymod) :
     // TODO: add default converters
 }
 
-module::~module() {}
+Module::~Module() {}
 
 } // namespace bp3

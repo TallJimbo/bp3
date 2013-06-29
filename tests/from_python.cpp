@@ -1,4 +1,4 @@
-#include "bp3/module.hpp"
+#include "bp3/Module.hpp"
 #include "bp3/conversion/from_python.hpp"
 
 #include <iostream>
@@ -41,7 +41,7 @@ private:
     }
 };
 
-static std::shared_ptr<bp3::module> mod;
+static std::shared_ptr<bp3::Module> mod;
 
 template <typename T>
 static PyObject * check_rv(PyObject * self, PyObject * arg) {
@@ -87,9 +87,9 @@ static PyMethodDef methods[] = {
     {nullptr, nullptr, 0, nullptr}
 };
 
-void wrap(bp3::module & mod_) {
+void wrap(bp3::Module & mod_) {
     std::cerr << "checkpoint1\n";
-    mod.reset(new bp3::module(mod_));
+    mod.reset(new bp3::Module(mod_));
     std::cerr << "checkpoint2\n";
     mod_.register_from_python(
         bp3::makeTypeInfo<Example1>(), true, &Example1::check1, &Example1::convert1
