@@ -1,8 +1,8 @@
 #ifndef BP3_CONVERSION_registration_hpp_INCLUDED
 #define BP3_CONVERSION_registration_hpp_INCLUDED
 
-#include "bp3/py_ptr.hpp"
-#include "bp3/type_id.hpp"
+#include "bp3/PyPtr.hpp"
+#include "bp3/TypeInfo.hpp"
 #include "bp3/conversion/from_python_funcs.hpp"
 
 #include <list>

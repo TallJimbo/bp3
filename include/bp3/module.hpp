@@ -1,7 +1,7 @@
 #ifndef BP3_module_hpp_INCLUDED
 #define BP3_module_hpp_INCLUDED
 
-#include "bp3/type_id.hpp"
+#include "bp3/TypeInfo.hpp"
 #include "bp3/conversion/from_python_base.hpp"
 #include "bp3/builtin/exceptions.hpp"
 
@@ -14,7 +14,7 @@
     init ## name() {                                                    \
         PyObject * m = Py_InitModule(#name, methods);                   \
         if (!m) return;                                                 \
-        bp3::module mod(bp3::py_ptr::borrow(m));                        \
+        bp3::module mod(bp3::PyPtr::borrow(m));                        \
         try {                                                           \
             callback(mod);                                              \
         } catch (bp3::builtin::BaseException & err) {                   \
@@ -36,7 +36,7 @@
     PyInit_ ## name() {                                                 \
         PyObject * m = PyModule_Create(&_bp3_module_def);               \
         if (!m) return m;                                               \
-        bp3::module mod(bp3::py_ptr::borrow(m));                        \
+        bp3::module mod(bp3::PyPtr::borrow(m));                        \
         try {                                                           \
             callback(mod);                                              \
         } catch (bp3::builtin::BaseException & err) {                   \
@@ -59,14 +59,14 @@ class registration;
 class module {
 public:
 
-    module(py_ptr const & pymod);
+    module(PyPtr const & pymod);
 
-    void add(std::string const & name, py_ptr const & ptr);
+    void add(std::string const & name, PyPtr const & ptr);
 
-    std::shared_ptr<conversion::registration> lookup(bp3::type_info const & t) const;
+    std::shared_ptr<conversion::registration> lookup(bp3::TypeInfo const & t) const;
 
     void register_from_python(
-        bp3::type_info const & t, bool is_lvalue,
+        bp3::TypeInfo const & t, bool is_lvalue,
         conversion::from_python_check_func check,
         conversion::from_python_convert_func convert,
         conversion::from_python_postcall_func postcall,
@@ -74,7 +74,7 @@ public:
     );
 
     void register_from_python(
-        bp3::type_info const & t, bool is_lvalue,
+        bp3::TypeInfo const & t, bool is_lvalue,
         conversion::from_python_check_func check,
         conversion::from_python_convert_func convert,
         conversion::from_python_cleanup_func cleanup=nullptr
@@ -86,8 +86,8 @@ public:
 
 private:
 
-    py_ptr _pymod;
-    py_ptr _pyregistry;
+    PyPtr _pymod;
+    PyPtr _pyregistry;
 };
 
 } // namespace bp3

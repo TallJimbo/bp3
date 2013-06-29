@@ -1,7 +1,7 @@
 #ifndef BP3_callable_hpp_INCLUDED
 #define BP3_callable_hpp_INCLUDED
 
-#include "bp3/py_ptr.hpp"
+#include "bp3/PyPtr.hpp"
 #include "bp3/keywords.hpp"
 #include "bp3/conversion/args_from_python.hpp"
 #include "bp3/module.hpp"
@@ -12,7 +12,7 @@ namespace bp3 {
 
 struct overload_data {
     bool unpack_successful;
-    std::vector<py_ptr> unpacked_args;
+    std::vector<PyPtr> unpacked_args;
     std::unique_ptr<conversion::args_from_python_base> converted_args;
 };
 
@@ -22,7 +22,7 @@ public:
     overload_base() = delete;
 
     void unpack_args(
-        std::string const & name, py_ptr const & args, py_ptr const & kwds, overload_data & data,
+        std::string const & name, PyPtr const & args, PyPtr const & kwds, overload_data & data,
         bool throw_on_failure
     ) const;
 
@@ -90,7 +90,7 @@ inline overload_ptr make_overload(std::function<Result(Args...)> func, arg_def_l
 class callable {
 public:
 
-    py_ptr call(py_ptr const & args, py_ptr const & kwds) const;
+    PyPtr call(PyPtr const & args, PyPtr const & kwds) const;
 
     template <typename F>
     void add_overload(F func, arg_def_list kwargs) {

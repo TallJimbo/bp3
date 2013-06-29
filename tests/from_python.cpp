@@ -16,17 +16,17 @@ namespace {
 class Example1 {
 public:
 
-    static bp3::py_ptr make(std::string const & value) {
+    static bp3::PyPtr make(std::string const & value) {
         Example1 * x = new Example1(value);
-        return bp3::py_ptr::steal(PyCapsule_New(x, "Example1", &destroy));
+        return bp3::PyPtr::steal(PyCapsule_New(x, "Example1", &destroy));
     }
 
-    static int check1(bp3::py_ptr const & ptr, bp3::converter_data &) {
+    static int check1(bp3::PyPtr const & ptr, bp3::converter_data &) {
         if (PyCapsule_IsValid(ptr.get(), "Example1")) return 0;
         return -1;
     }
 
-    static void * convert1(bp3::py_ptr const & ptr, bp3::converter_data &) {
+    static void * convert1(bp3::PyPtr const & ptr, bp3::converter_data &) {
         return PyCapsule_GetPointer(ptr.get(), "Example1");
     }
 
@@ -45,7 +45,7 @@ static std::shared_ptr<bp3::module> mod;
 
 template <typename T>
 static PyObject * check_rv(PyObject * self, PyObject * arg) {
-    bp3::py_ptr py1 = bp3::py_ptr::borrow(arg);
+    bp3::PyPtr py1 = bp3::PyPtr::borrow(arg);
     assert(mod);
     bp3::conversion::from_python<T> converter(*mod, py1);
     if (!converter.is_convertible()) {
@@ -60,7 +60,7 @@ static PyObject * check_rv(PyObject * self, PyObject * arg) {
 
 template <typename T>
 static PyObject * check_ptr(PyObject * self, PyObject * arg) {
-    bp3::py_ptr py1 = bp3::py_ptr::borrow(arg);
+    bp3::PyPtr py1 = bp3::PyPtr::borrow(arg);
     assert(mod);
     bp3::conversion::from_python<T> converter(*mod, py1);
     if (!converter.is_convertible()) {
@@ -92,7 +92,7 @@ void wrap(bp3::module & mod_) {
     mod.reset(new bp3::module(mod_));
     std::cerr << "checkpoint2\n";
     mod_.register_from_python(
-        bp3::type_id<Example1>(), true, &Example1::check1, &Example1::convert1
+        bp3::makeTypeInfo<Example1>(), true, &Example1::check1, &Example1::convert1
     );
     std::cerr << "checkpoint3\n";
     mod_.add("py1", Example1::make("ex1"));

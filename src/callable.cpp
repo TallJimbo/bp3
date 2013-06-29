@@ -8,13 +8,13 @@ overload_base::overload_base(std::size_t n_args, arg_def_list const & arg_defs) 
 
 void overload_base::unpack_args(
     std::string const & name,
-    py_ptr const & args, py_ptr const & kwds,
+    PyPtr const & args, PyPtr const & kwds,
     overload_data & data, bool throw_on_failure
 ) const {
     data.unpack_successful = _arg_defs.parse(name, args, kwds, data.unpacked_args, throw_on_failure);
 }
 
-py_ptr callable::call(py_ptr const & args, py_ptr const & kwds) const {
+PyPtr callable::call(PyPtr const & args, PyPtr const & kwds) const {
     try {
         if (_overloads.size() == static_cast<std::size_t>(1)) {
             overload_data data;
@@ -32,13 +32,13 @@ py_ptr callable::call(py_ptr const & args, py_ptr const & kwds) const {
             }
             // TODO: actually calling the C++ func;
         }
-        return py_ptr::borrow(Py_None);
+        return PyPtr::borrow(Py_None);
     } catch (builtin::Exception & err) {
         err.release();
-        return py_ptr();
+        return PyPtr();
     } catch (...) {
         PyErr_SetString(PyExc_RuntimeError, "unknown C++ exception");
-        return py_ptr();
+        return PyPtr();
     }
 }
 

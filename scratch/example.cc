@@ -1,4 +1,4 @@
-#include "bp3/py_ptr.hpp"
+#include "bp3/PyPtr.hpp"
 #include "bp3/callable.hpp"
 
 class Example {
@@ -7,17 +7,17 @@ public:
     int func1(double) { return 1; }
     int func2(double) const { return 2; }
 
-    static bp3::py_ptr make() {
+    static bp3::PyPtr make() {
         Example * x = new Example();
-        return bp3::py_ptr::steal(PyCapsule_New(x, "Example", &destroy));
+        return bp3::PyPtr::steal(PyCapsule_New(x, "Example", &destroy));
     }
 
-    static int check(bp3::py_ptr const & ptr, bp3::converter_data &) {
+    static int check(bp3::PyPtr const & ptr, bp3::converter_data &) {
         if (PyCapsule_IsValid(ptr.get(), "Example")) return 0;
         return -1;
     }
 
-    static void * convert(bp3::py_ptr const & ptr, bp3::converter_data &) {
+    static void * convert(bp3::PyPtr const & ptr, bp3::converter_data &) {
         return PyCapsule_GetPointer(ptr.get(), "Example");
     }
 
@@ -57,10 +57,10 @@ PyObject * run(PyObject *, PyObject *) {
         auto f3 = bp3::callable(mod, "f3", &func3, {"x"});
         auto f4 = bp3::callable(mod, "f4", std::function<int(Example&,double)>(func4), {"x"});
 
-        bp3::py_ptr args = bp3::py_ptr::steal(PyTuple_New(2));
+        bp3::PyPtr args = bp3::PyPtr::steal(PyTuple_New(2));
         PyTuple_SET_ITEM(args.get(), 0, Example::make().release());
         PyTuple_SET_ITEM(args.get(), 1, PyFloat_FromDouble(3.2));
-        bp3::py_ptr kwargs = bp3::py_ptr::steal(PyDict_New());
+        bp3::PyPtr kwargs = bp3::PyPtr::steal(PyDict_New());
 
         f1.call(args, kwargs);
         f2.call(args, kwargs);

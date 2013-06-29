@@ -1,25 +1,25 @@
 #ifndef BP3_BUILTIN_object_hpp_INCLUDED
 #define BP3_BUILTIN_object_hpp_INCLUDED
 
-#include "bp3/py_ptr.hpp"
+#include "bp3/PyPtr.hpp"
 
 #include <string>
 
-#define BP3_BUILTIN_CTOR(cls) cls(py_ptr const & ptr) : base(ptr) {}
+#define BP3_BUILTIN_CTOR(cls) cls(PyPtr const & ptr) : base(ptr) {}
 
 namespace bp3 { namespace builtin {
 
 class object {
 public:
 
-    object() : _ptr(py_ptr::steal(Py_None)) {}
+    object() : _ptr(PyPtr::steal(Py_None)) {}
 
-    explicit object(py_ptr const & ptr) : _ptr(ptr.raise_if_null()) {}
+    explicit object(PyPtr const & ptr) : _ptr(ptr.raise_if_null()) {}
 
-    py_ptr const & ptr() const { return _ptr; }
+    PyPtr const & ptr() const { return _ptr; }
 
 protected:
-    py_ptr _ptr;
+    PyPtr _ptr;
 };
 
 class type : public object {
@@ -29,10 +29,10 @@ public:
 
     type(object const & obj);
 
-    explicit type(py_ptr const & ptr);
+    explicit type(PyPtr const & ptr);
 
     static type typeobject() {
-        return type(py_ptr::borrow(reinterpret_cast<PyObject*>(&PyType_Type)));
+        return type(PyPtr::borrow(reinterpret_cast<PyObject*>(&PyType_Type)));
     }
 
 };
@@ -43,10 +43,10 @@ template <PyTypeObject * Type>
 class builtin_object_base : public object {
 public:
 
-    explicit builtin_object_base(py_ptr const & ptr) :
-        object(ptr.raise_if_not_isinstance(py_ptr::borrow(reinterpret_cast<PyObject*>(Type)))) {}
+    explicit builtin_object_base(PyPtr const & ptr) :
+        object(ptr.raise_if_not_isinstance(PyPtr::borrow(reinterpret_cast<PyObject*>(Type)))) {}
 
-    static type typeobject() { return type(py_ptr::borrow(reinterpret_cast<PyObject*>(Type))); }
+    static type typeobject() { return type(PyPtr::borrow(reinterpret_cast<PyObject*>(Type))); }
 
 };
 

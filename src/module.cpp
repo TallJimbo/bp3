@@ -8,15 +8,15 @@ namespace bp3 {
 
 namespace {
 
-struct compare_type_info {
-    bool operator()(bp3::type_info const & a, bp3::type_info const & b) const {
+struct compare_TypeInfo {
+    bool operator()(bp3::TypeInfo const & a, bp3::TypeInfo const & b) const {
         return std::strcmp(a.name(), b.name()) < 0;
     }
 };
 
-typedef std::map<bp3::type_info,std::shared_ptr<conversion::registration>,compare_type_info> registry_map;
+typedef std::map<bp3::TypeInfo,std::shared_ptr<conversion::registration>,compare_TypeInfo> registry_map;
 
-registry_map & extract(py_ptr const & pyregistry) {
+registry_map & extract(PyPtr const & pyregistry) {
     return *reinterpret_cast<registry_map*>(PyCapsule_GetPointer(pyregistry.get(), "bp3.registry"));
 }
 
@@ -27,13 +27,13 @@ void destroy_registry_map(PyObject * capsule) {
 
 } // anonymous
 
-void module::add(std::string const & name, py_ptr const & ptr) {
+void module::add(std::string const & name, PyPtr const & ptr) {
     if (PyModule_AddObject(_pymod.get(), name.c_str(), ptr.incref()) < 0) {
         throw_error_already_set();
     }
 }
 
-std::shared_ptr<conversion::registration> module::lookup(bp3::type_info const & t) const {
+std::shared_ptr<conversion::registration> module::lookup(bp3::TypeInfo const & t) const {
     registry_map & registry = extract(_pyregistry);
     registry_map::const_iterator iter = registry.find(t);
     std::shared_ptr<conversion::registration> result;
@@ -42,7 +42,7 @@ std::shared_ptr<conversion::registration> module::lookup(bp3::type_info const & 
 }
 
 void module::register_from_python(
-    bp3::type_info const & t, bool is_lvalue,
+    bp3::TypeInfo const & t, bool is_lvalue,
     conversion::from_python_check_func check,
     conversion::from_python_convert_func convert,
     conversion::from_python_postcall_func postcall,
@@ -58,9 +58,9 @@ void module::register_from_python(
     );
 }
 
-module::module(py_ptr const & pymod) :
+module::module(PyPtr const & pymod) :
     _pymod(pymod),
-    _pyregistry(py_ptr::steal(PyCapsule_New(new registry_map, "bp3.registry", destroy_registry_map)))
+    _pyregistry(PyPtr::steal(PyCapsule_New(new registry_map, "bp3.registry", destroy_registry_map)))
 {
     PyModule_AddObject(pymod.get(), "registry", _pyregistry.incref());
     // TODO: add default converters

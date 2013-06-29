@@ -1,7 +1,7 @@
 #ifndef BP3_type_id_hpp_INCLUDED
 #define BP3_type_id_hpp_INCLUDED
 
-#include "bp3/py_ptr.hpp"
+#include "bp3/PyPtr.hpp"
 
 #include <typeinfo>
 #include <cstring>
@@ -11,7 +11,7 @@ namespace bp3 {
 // Essentially copied from Boost.Python v2 implementation
 // (but with fewer workarounds for old compilers that we
 // know we can't support anymore for other reasons).
-// This provides a copyable type_info class that works
+// This provides a copyable TypeInfo class that works
 // across shared library boundaries.
 
 #if (defined(__GNUC__) && __GNUC__ >= 3)       \
@@ -22,24 +22,24 @@ namespace bp3 {
 #define BP3_TYPE_ID_NAME
 #endif 
 
-struct type_info {
+struct TypeInfo {
 
-    inline type_info(std::type_info const & = typeid(void));
+    inline TypeInfo(std::type_info const & = typeid(void));
 
-    inline bool operator==(type_info const & other) const;
+    inline bool operator==(TypeInfo const & other) const;
 
     char const * name() const;
 
  private:
 #ifdef BP3_TYPE_ID_NAME
-    typedef char const* base_id_t;
+    typedef char const* BaseID;
 #else
-    typedef std::type_info const* base_id_t;
+    typedef std::type_info const* BaseID;
 #endif
-    base_id_t _base_type;
+    BaseID _base_type;
 };
 
-inline type_info::type_info(std::type_info const & t)
+inline TypeInfo::TypeInfo(std::type_info const & t)
     : _base_type(
 #ifdef BP3_TYPE_ID_NAME
         t.name()
@@ -49,9 +49,9 @@ inline type_info::type_info(std::type_info const & t)
     ) {}
 
 template <typename T>
-inline type_info type_id() { return type_info(typeid(T)); }
+inline TypeInfo makeTypeInfo() { return TypeInfo(typeid(T)); }
 
-inline bool type_info::operator==(type_info const & other) const {
+inline bool TypeInfo::operator==(TypeInfo const & other) const {
 #ifdef BP3_TYPE_ID_NAME
     return !std::strcmp(_base_type, other._base_type);
 #else
@@ -59,7 +59,7 @@ inline bool type_info::operator==(type_info const & other) const {
 #endif
 }
 
-inline char const* type_info::name() const
+inline char const* TypeInfo::name() const
 {
     return _base_type
 #ifndef BP3_TYPE_ID_NAME

@@ -3,7 +3,7 @@
 
 namespace bp3 {
 
-py_ptr const & py_ptr::raise_if_null() const {
+PyPtr const & PyPtr::raise_if_null() const {
     if (!_p) {
         if (PyErr_Occurred()) {
             throw_error_already_set();
@@ -14,14 +14,14 @@ py_ptr const & py_ptr::raise_if_null() const {
     return *this;
 }
 
-py_ptr const & py_ptr::raise_if_not_isinstance(py_ptr const & cls) const {
+PyPtr const & PyPtr::raise_if_not_isinstance(PyPtr const & cls) const {
     static std::string message = " is not an instance of ";
     raise_if_null();
     int r = PyObject_IsInstance(this->get(), cls.get());
     if (r < 0) throw_error_already_set();
     if (r == 0) {
-        py_ptr ps1 = py_ptr::steal(PyObject_Repr(this->get())); ps1.raise_if_null();
-        py_ptr ps2 = py_ptr::steal(PyObject_Repr(cls.get())); ps2.raise_if_null();
+        PyPtr ps1 = PyPtr::steal(PyObject_Repr(this->get())); ps1.raise_if_null();
+        PyPtr ps2 = PyPtr::steal(PyObject_Repr(cls.get())); ps2.raise_if_null();
         // FIXME: probably won't work with Python 3.x
         char const * s1 = PyBytes_AsString(ps1.get()); if (!s1) throw_error_already_set();
         char const * s2 = PyBytes_AsString(ps2.get()); if (!s2) throw_error_already_set();
@@ -32,15 +32,15 @@ py_ptr const & py_ptr::raise_if_not_isinstance(py_ptr const & cls) const {
 
 namespace builtin {
 
-type::type(object const & obj) : object(py_ptr::steal(PyObject_Type(obj.ptr().get()))) {}
+type::type(object const & obj) : object(PyPtr::steal(PyObject_Type(obj.ptr().get()))) {}
 
-type::type(py_ptr const & ptr) :
-    object(ptr.raise_if_not_isinstance(py_ptr::borrow(reinterpret_cast<PyObject*>(&PyType_Type))))
+type::type(PyPtr const & ptr) :
+    object(ptr.raise_if_not_isinstance(PyPtr::borrow(reinterpret_cast<PyObject*>(&PyType_Type))))
 {}
 
 type::type(object const & name, object const & bases, object const & dict) :
     object(
-        py_ptr::steal(
+        PyPtr::steal(
             PyObject_CallFunctionObjArgs(
                 reinterpret_cast<PyObject*>(&PyType_Type),
                 name.ptr().get(), bases.ptr().get(), dict.ptr().get(), nullptr
@@ -62,11 +62,11 @@ bool isinstance(object const & inst, object const & cls) {
 }
 
 object getattr(object const & inst, char const * name) {
-    return object(py_ptr::steal(PyObject_GetAttrString(inst.ptr().get(), name)));
+    return object(PyPtr::steal(PyObject_GetAttrString(inst.ptr().get(), name)));
 }
 
 object getattr(object const & inst, object const & name) {
-    return object(py_ptr::steal(PyObject_GetAttr(inst.ptr().get(), name.ptr().get())));
+    return object(PyPtr::steal(PyObject_GetAttr(inst.ptr().get(), name.ptr().get())));
 }
 
 void setattr(object const & inst, char const * name, object const & value) {

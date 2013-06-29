@@ -1,7 +1,7 @@
 #ifndef BP3_keywords_hpp_INCLUDED
 #define BP3_keywords_hpp_INCLUDED
 
-#include "bp3/py_ptr.hpp"
+#include "bp3/PyPtr.hpp"
 #include "bp3/builtin/exceptions.hpp"
 #include "bp3/utils/any.hpp"
 
@@ -33,8 +33,8 @@ public:
 
     bool parse(
         std::string const & function_name,
-        py_ptr const & args, py_ptr const & kwds,
-        std::vector<py_ptr> & output,
+        PyPtr const & args, PyPtr const & kwds,
+        std::vector<PyPtr> & output,
         bool throw_on_failure=true
     ) const;
 

@@ -9,7 +9,7 @@ namespace {
 
 std::tuple<int,from_python_funcs*,converter_data> find_from_python_converter(
     std::shared_ptr<registration> const & reg,
-    py_ptr const & py,
+    PyPtr const & py,
     bool is_lvalue,
     int inheritance_offset
 ) {
@@ -88,8 +88,8 @@ std::tuple<int,from_python_funcs*,converter_data> find_from_python_converter(
 
 from_python_base::from_python_base(
     module const & mod,
-    py_ptr const & py,
-    bp3::type_info const & ti,
+    PyPtr const & py,
+    bp3::TypeInfo const & ti,
     bool is_lvalue
 ) : _py(py), _penalty(-1), _data(), _funcs(nullptr)
 {

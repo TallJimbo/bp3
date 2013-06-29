@@ -36,14 +36,14 @@ add_library(bp3 ${LIBRARY_TYPE}
   include/bp3/builtin/numbers.hpp
   include/bp3/builtin/str.hpp
   include/bp3/builtin/sequence.hpp
-  include/bp3/type_id.hpp
+  include/bp3/TypeInfo.hpp
   include/bp3/conversion/from_python.hpp
   include/bp3/conversion/args_from_python.hpp
   include/bp3/conversion/registration.hpp
   include/bp3/conversion/from_python_base.hpp
   include/bp3/conversion/from_python_funcs.hpp
   include/bp3/builtin.hpp
-  include/bp3/py_ptr.hpp
+  include/bp3/PyPtr.hpp
   include/bp3/module.hpp
   # source files
   src/callable.cpp

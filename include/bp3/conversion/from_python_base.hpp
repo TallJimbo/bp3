@@ -1,8 +1,8 @@
 #ifndef BP3_CONVERSION_from_python_base_hpp_INCLUDED
 #define BP3_CONVERSION_from_python_base_hpp_INCLUDED
 
-#include "bp3/py_ptr.hpp"
-#include "bp3/type_id.hpp"
+#include "bp3/PyPtr.hpp"
+#include "bp3/TypeInfo.hpp"
 
 namespace bp3 { 
 
@@ -35,7 +35,7 @@ namespace conversion  {
    If the check function throws an exception, the exception will be caught and ignored, and the call
    will be treated as though a negative value was returned; the cleanup function will not be called.
 */
-typedef int (*from_python_check_func)(py_ptr const &, converter_data &);
+typedef int (*from_python_check_func)(PyPtr const &, converter_data &);
 
 /*
    Function that does the conversion; the returned pointer points to
@@ -49,13 +49,13 @@ typedef int (*from_python_check_func)(py_ptr const &, converter_data &);
    (or the same member function on an Exception subclass); calling
    code will ensure the cleanup function (if provided) is called.
 */
-typedef void * (*from_python_convert_func)(py_ptr const &, converter_data &);
+typedef void * (*from_python_convert_func)(PyPtr const &, converter_data &);
 
 /*
    Postcall is only called if the convert function is also called, and
    converters are not required to have a postcall function at all.
 */
-typedef void (*from_python_postcall_func)(py_ptr const &, converter_data &);
+typedef void (*from_python_postcall_func)(PyPtr const &, converter_data &);
 
 /*
    Cleanup is called whenever the check function does not throw.  It
@@ -71,7 +71,7 @@ class from_python_base {
 public:
 
     explicit from_python_base(
-        module const & mod, py_ptr const & py, bp3::type_info const & ti, bool is_lvalue
+        module const & mod, PyPtr const & py, bp3::TypeInfo const & ti, bool is_lvalue
     );
 
     from_python_base(from_python_base const &) = delete;
@@ -89,7 +89,7 @@ public:
 protected:
     void * _convert();
 private:
-    py_ptr _py;
+    PyPtr _py;
     int _penalty;
     converter_data _data;
     from_python_funcs * _funcs;

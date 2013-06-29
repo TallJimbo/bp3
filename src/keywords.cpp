@@ -16,8 +16,8 @@ namespace bp3 {
  */
 bool arg_def_list::parse(
     std::string const & function_name,
-    py_ptr const & pyargs, py_ptr const & pykwds,
-    std::vector<py_ptr> & output,
+    PyPtr const & pyargs, PyPtr const & pykwds,
+    std::vector<PyPtr> & output,
     bool throw_on_failure
 ) const {
     output.resize(_vec.size());
@@ -33,14 +33,14 @@ bool arg_def_list::parse(
         }
     }
     for (Py_ssize_t i = 0; i < len_pyargs; ++i) {
-        output[i] = py_ptr::borrow(PyTuple_GET_ITEM(pyargs.get(), i));
+        output[i] = PyPtr::borrow(PyTuple_GET_ITEM(pyargs.get(), i));
     }
     if (pykwds) {
         PyObject * key = nullptr;
         PyObject * value = nullptr;
         Py_ssize_t i = 0;
         while (PyDict_Next(pykwds.get(), &i, &key, &value)) {
-            std::string key_str = builtin::str(py_ptr::borrow(key));
+            std::string key_str = builtin::str(PyPtr::borrow(key));
             bool success = false;
             for (std::size_t n = 0; n < _vec.size(); ++n) {
                 if (key_str == _vec[n].name) {
@@ -54,7 +54,7 @@ bool arg_def_list::parse(
                             return false;
                         }
                     }
-                    output[n] = py_ptr::borrow(value);
+                    output[n] = PyPtr::borrow(value);
                     success = true;
                     break;
                 }

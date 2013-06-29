@@ -1,7 +1,7 @@
 #ifndef BP3_BUILTIN_str_hpp_INCLUDED
 #define BP3_BUILTIN_str_hpp_INCLUDED
 
-#include "bp3/py_ptr.hpp"
+#include "bp3/PyPtr.hpp"
 #include "bp3/builtin/object.hpp"
 #include "bp3/builtin/sequence.hpp"
 
