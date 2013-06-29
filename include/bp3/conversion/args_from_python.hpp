@@ -5,32 +5,40 @@
 
 namespace bp3 { namespace conversion  {
 
+struct args_from_python_base {
+
+    args_from_python_base() : penalty(0) {}
+
+    args_from_python_base(args_from_python_base const &) = delete;
+
+    args_from_python_base & operator=(args_from_python_base const &) = delete;
+
+    virtual ~args_from_python_base() {}
+
+    int penalty;
+};
+
 namespace detail {
 
 template <std::size_t N, typename ...E>
 struct args_from_python_impl;
 
 template <std::size_t N>
-struct args_from_python_impl<N> {
+struct args_from_python_impl<N> : public args_from_python_base {
 
-    explicit args_from_python_impl(module const & mod, std::vector<py_ptr> const & py_args) {}
+    explicit args_from_python_impl(module const & mod, std::vector<py_ptr> const & unpacked_args) {}
 
 };
 
 template <std::size_t N, typename T, typename ...E>
 struct args_from_python_impl<N,T,E...> : public args_from_python_impl<N+1,E...> {
-    
+
     typedef args_from_python_impl<N+1,E...> base_t;
 
-    explicit args_from_python_impl(module const & mod, std::vector<py_ptr> const & py_args) :
-        base_t(mod, py_args), _elem(mod, py_args[N])
-    {}
-
-    args_from_python_impl(args_from_python_impl const &) = delete;
-    args_from_python_impl & operator=(args_from_python_impl const &) = delete;
-
-    int penalty() const {
-        return _elem.penalty() + base_t::penalty();
+    explicit args_from_python_impl(module const & mod, std::vector<py_ptr> const & unpacked_args) :
+        base_t(mod, unpacked_args), _elem(mod, unpacked_args[N])
+    {
+        this->penalty += _elem.penalty();
     }
 
     from_python<T> _elem;
@@ -43,8 +51,8 @@ class args_from_python : public detail::args_from_python_impl<0,E...> {
     typedef detail::args_from_python_impl<0,E...> base_t;
 public:
 
-    args_from_python(module const & mod, std::vector<py_ptr> const & py_args) :
-        base_t(mod, py_args)
+    args_from_python(module const & mod, std::vector<py_ptr> const & unpacked_args) :
+        base_t(mod, unpacked_args)
     {}
 
 };

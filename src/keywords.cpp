@@ -14,7 +14,7 @@ namespace bp3 {
  * For non-overloaded functions, throw_on_failure is true, so we can
  * raise more desciptive exceptions within this routine.
  */
-bool arg_list::parse(
+bool arg_def_list::parse(
     std::string const & function_name,
     py_ptr const & pyargs, py_ptr const & pykwds,
     std::vector<py_ptr> & output,
@@ -84,7 +84,7 @@ bool arg_list::parse(
     return true;
 }
 
-void arg_list::validate(std::size_t n_args) {
+void arg_def_list::validate(std::size_t n_args) {
     if (n_args > _vec.size()) {
         _vec.insert(_vec.begin(), arg("self"));
     }

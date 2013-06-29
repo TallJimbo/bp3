@@ -2,32 +2,35 @@
 
 namespace bp3 {
 
-namespace {
+overload_base::overload_base(std::size_t n_args, arg_def_list const & arg_defs) : _arg_defs(arg_defs) {
+    _arg_defs.validate(n_args);
+}
 
-struct overload_data {
-    bool unpack_successful;
-    std::vector<py_ptr> unpacked_args;
-};
-
-} // anonymous
-
-overload_base::overload_base(std::size_t n_args, arg_list const & kwargs) : _kwargs(kwargs) {
-    _kwargs.validate(n_args);
+void overload_base::unpack_args(
+    std::string const & name,
+    py_ptr const & args, py_ptr const & kwds,
+    overload_data & data, bool throw_on_failure
+) const {
+    data.unpack_successful = _arg_defs.parse(name, args, kwds, data.unpacked_args, throw_on_failure);
 }
 
 py_ptr callable::call(py_ptr const & args, py_ptr const & kwds) const {
     try {
         if (_overloads.size() == static_cast<std::size_t>(1)) {
-            std::vector<py_ptr> unpacked_args;
-            _overloads.front()->_kwargs.parse(_name, args, kwds, unpacked_args, true);
-            // TODO: conversions, actually calling the C++ func.
+            overload_data data;
+            _overloads.front()->unpack_args(_name, args, kwds, data, true);
+            assert(data.unpack_successful);  // or we should have thrown
+            _overloads.front()->convert_args(_mod, data);
+            // TODO: actually calling the C++ func.
         } else {
             std::vector<overload_data> data(_overloads.size());
             for (std::size_t i = 0; i < _overloads.size(); ++i) {
-                data[i].unpack_successful =
-                    _overloads[i]->_kwargs.parse(_name, args, kwds, data[i].unpacked_args, false);
+                _overloads[i]->unpack_args(_name, args, kwds, data[i], false);
+                if (data[i].unpack_successful) {
+                    _overloads[i]->convert_args(_mod, data[i]);
+                }
             }
-            // TODO: conversions, actually calling the C++ func;
+            // TODO: actually calling the C++ func;
         }
         return py_ptr::borrow(Py_None);
     } catch (builtin::Exception & err) {
