@@ -2,7 +2,6 @@
 #define BP3_keywords_hpp_INCLUDED
 
 #include "bp3/py_ptr.hpp"
-#include "bp3/meta.hpp"
 #include "bp3/builtin/exceptions.hpp"
 #include "bp3/utils/any.hpp"
 

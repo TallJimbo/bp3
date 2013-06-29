@@ -2,7 +2,6 @@
 #define BP3_CONVERSION_args_from_python_hpp_INCLUDED
 
 #include "bp3/conversion/from_python.hpp"
-#include "bp3/meta.hpp"
 
 namespace bp3 { namespace conversion  {
 

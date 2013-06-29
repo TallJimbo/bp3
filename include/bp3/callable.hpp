@@ -2,7 +2,6 @@
 #define BP3_callable_hpp_INCLUDED
 
 #include "bp3/py_ptr.hpp"
-#include "bp3/meta.hpp"
 #include "bp3/keywords.hpp"
 #include "bp3/conversion/args_from_python.hpp"
 #include "bp3/module.hpp"
