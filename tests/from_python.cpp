@@ -1,6 +1,7 @@
 #include "bp3/module.hpp"
 #include "bp3/conversion/from_python.hpp"
 
+#include <iostream>
 #include <string>
 
 /*
@@ -40,12 +41,13 @@ private:
     }
 };
 
-static bp3::module mod;
+static std::shared_ptr<bp3::module> mod;
 
 template <typename T>
 static PyObject * check_rv(PyObject * self, PyObject * arg) {
     bp3::py_ptr py1 = bp3::py_ptr::borrow(arg);
-    bp3::conversion::from_python<T> converter(mod, py1);
+    assert(mod);
+    bp3::conversion::from_python<T> converter(*mod, py1);
     if (!converter.is_convertible()) {
         Py_RETURN_FALSE;
     }
@@ -59,7 +61,8 @@ static PyObject * check_rv(PyObject * self, PyObject * arg) {
 template <typename T>
 static PyObject * check_ptr(PyObject * self, PyObject * arg) {
     bp3::py_ptr py1 = bp3::py_ptr::borrow(arg);
-    bp3::conversion::from_python<T> converter(mod, py1);
+    assert(mod);
+    bp3::conversion::from_python<T> converter(*mod, py1);
     if (!converter.is_convertible()) {
         Py_RETURN_FALSE;
     }
@@ -84,39 +87,16 @@ static PyMethodDef methods[] = {
     {nullptr, nullptr, 0, nullptr}
 };
 
-#if PY_MAJOR_VERSION == 2
-
-PyMODINIT_FUNC
-initfrom_python_mod() {
-    PyObject * m = Py_InitModule("from_python_mod", methods);
-
-    if (!m) return;
-
-    mod.register_from_python(
+void wrap(bp3::module & mod_) {
+    std::cerr << "checkpoint1\n";
+    mod.reset(new bp3::module(mod_));
+    std::cerr << "checkpoint2\n";
+    mod_.register_from_python(
         bp3::type_id<Example1>(), true, &Example1::check1, &Example1::convert1
     );
-    PyModule_AddObject(m, "py1", Example1::make("ex1").release());
+    std::cerr << "checkpoint3\n";
+    mod_.add("py1", Example1::make("ex1"));
+    std::cerr << "checkpoint4\n";
 }
 
-#else
-
-static PyModuleDef module = {
-    PyModuleDef_HEAD_INIT,
-    "from_python_mod",
-    nullptr,
-    -1,
-    methods
-};
-
-PyMODINIT_FUNC
-PyInit_from_python_mod() {
-    PyObject * m = PyModule_Create(&module);
-    if (!m) return m;
-    mod.register_from_python(
-        bp3::type_id<Example1>(), true, &Example1::check1, &Example1::convert1
-    );
-    PyModule_AddObject(m, "py1", Example1::make("ex1").release());
-    return m;
-}
-
-#endif
+BP3_MODULE(from_python_mod, wrap, methods)

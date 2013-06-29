@@ -6,6 +6,7 @@ enable_testing()
 add_subdirectory(cmake)
 
 set(LIBRARY_TYPE SHARED)
+set(CMAKE_BUILD_TYPE Debug)
 
 include_directories(
   ${PROJECT_BINARY_DIR}/include
