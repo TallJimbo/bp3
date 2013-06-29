@@ -3,7 +3,7 @@
 
 #include "bp3/PyPtr.hpp"
 #include "bp3/builtin/exceptions.hpp"
-#include "bp3/utils/any.hpp"
+#include "bp3/utils/Any.hpp"
 
 #include <vector>
 #include <iostream>
@@ -13,7 +13,7 @@ namespace bp3 {
 class arg {
 public:
     std::string name;
-    utils::any value;
+    utils::Any value;
 
     arg(char const * s) : name(s) {}
 
