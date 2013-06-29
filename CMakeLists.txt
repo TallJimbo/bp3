@@ -29,33 +29,35 @@ add_custom_command(
 add_library(bp3 ${LIBRARY_TYPE}
   # header files
   include/bp3/utils/Any.hpp
-  include/bp3/keywords.hpp
-  include/bp3/callable.hpp
+  include/bp3/callables/ArgDef.hpp
+  include/bp3/callables/Overload.hpp
+  include/bp3/callables/Callable.hpp
+  include/bp3/callables/ArgsFromPython.hpp
   ${CMAKE_CURRENT_BINARY_DIR}/include/bp3/builtin/exceptions.hpp
   include/bp3/builtin/object.hpp
   include/bp3/builtin/numbers.hpp
   include/bp3/builtin/str.hpp
   include/bp3/builtin/sequence.hpp
   include/bp3/TypeInfo.hpp
-  include/bp3/conversion/from_python.hpp
-  include/bp3/conversion/args_from_python.hpp
-  include/bp3/conversion/registration.hpp
-  include/bp3/conversion/from_python_base.hpp
-  include/bp3/conversion/from_python_funcs.hpp
+  include/bp3/FromPython.hpp
+  include/bp3/FromPythonBase.hpp
+  include/bp3/FromPythonFuncs.hpp
+  include/bp3/Registration.hpp
   include/bp3/builtin.hpp
   include/bp3/PyPtr.hpp
   include/bp3/Module.hpp
   # source files
-  src/callable.cpp
+  src/callables/ArgDef.cpp
+  src/callables/Overload.cpp
+  src/callables/Callable.cpp
   src/Module.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/src/builtin/exceptions.cpp
   src/builtin/object.cpp
   src/builtin/numbers.cpp
   src/builtin/str.cpp
   src/builtin/sequence.cpp
-  src/conversion/from_python_base.cpp
-  src/conversion/registration.cpp
-  src/keywords.cpp
+  src/FromPythonBase.cpp
+  src/Registration.cpp
 )
 
 add_subdirectory(python/bp3)

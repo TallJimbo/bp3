@@ -1,26 +1,25 @@
 #include "bp3/Module.hpp"
-#include "bp3/conversion/from_python_base.hpp"
-#include "bp3/conversion/from_python_funcs.hpp"
-#include "bp3/conversion/registration.hpp"
+#include "bp3/FromPythonBase.hpp"
+#include "bp3/Registration.hpp"
 
-namespace bp3 { namespace conversion {
+namespace bp3 {
 
 namespace {
 
-std::tuple<int,from_python_funcs*,converter_data> find_from_python_converter(
-    std::shared_ptr<registration> const & reg,
+std::tuple<int,FromPythonFuncs*,ConverterData> findFromPythonConverter(
+    std::shared_ptr<Registration> const & reg,
     PyPtr const & py,
     bool is_lvalue,
     int inheritance_offset
 ) {
     int best_penalty = -1;
     int current_penalty = -1;
-    from_python_funcs * best_funcs = nullptr;
-    converter_data best_data;
-    converter_data current_data;
+    FromPythonFuncs * best_funcs = nullptr;
+    ConverterData best_data;
+    ConverterData current_data;
     assert(reg);
     for (auto converter_list : reg->from_python) {
-        for (from_python_funcs & current_funcs : *converter_list) {
+        for (FromPythonFuncs & current_funcs : *converter_list) {
             if (is_lvalue && !current_funcs.is_lvalue) {
                 continue;
             }
@@ -59,8 +58,8 @@ std::tuple<int,from_python_funcs*,converter_data> find_from_python_converter(
     for (auto iter = reg->derived.begin(); iter != reg->derived.end(); ++iter) {
         // Recurse using derived class; returned penalty will include inheritance_offset
         // unless it's a complete failure.
-        from_python_funcs * current_funcs = nullptr;
-        std::tie(current_penalty,current_funcs,current_data) = find_from_python_converter(
+        FromPythonFuncs * current_funcs = nullptr;
+        std::tie(current_penalty,current_funcs,current_data) = findFromPythonConverter(
             *iter, py, is_lvalue, inheritance_offset + 1
         );
         if (current_penalty < 0) continue;
@@ -86,25 +85,25 @@ std::tuple<int,from_python_funcs*,converter_data> find_from_python_converter(
 
 } // anonymous
 
-from_python_base::from_python_base(
+FromPythonBase::FromPythonBase(
     Module const & mod,
     PyPtr const & py,
     bp3::TypeInfo const & ti,
     bool is_lvalue
 ) : _py(py), _penalty(-1), _data(), _funcs(nullptr)
 {
-    std::shared_ptr<registration> reg = mod.lookup(ti);
+    std::shared_ptr<Registration> reg = mod.lookup(ti);
     if (reg) {
-        std::tie(_penalty, _funcs, _data) = find_from_python_converter(reg, py, is_lvalue, 0);
+        std::tie(_penalty, _funcs, _data) = findFromPythonConverter(reg, py, is_lvalue, 0);
     }
 }
 
-void * from_python_base::_convert() { return _funcs->convert(_py, _data); }
+void * FromPythonBase::_convert() { return _funcs->convert(_py, _data); }
 
-void from_python_base::postcall() { if (_funcs->postcall) _funcs->postcall(_py, _data); }
+void FromPythonBase::postcall() { if (_funcs->postcall) _funcs->postcall(_py, _data); }
 
-from_python_base::~from_python_base() {
+FromPythonBase::~FromPythonBase() {
     if (_funcs && _funcs->cleanup) _funcs->cleanup(_data);
 }
 
-}} // namespace bp3::conversion
+} // namespace bp3

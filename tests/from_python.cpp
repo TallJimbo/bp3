@@ -1,11 +1,11 @@
 #include "bp3/Module.hpp"
-#include "bp3/conversion/from_python.hpp"
+#include "bp3/FromPython.hpp"
 
 #include <iostream>
 #include <string>
 
 /*
- *  Unit test for from_python converters.
+ *  Unit test for FromPython converters.
  *
  *  We wrap the example classes using Python's built-in Capsule objects
  *  so as not to get conversion mixed up with wrapping at this stage.
@@ -21,12 +21,12 @@ public:
         return bp3::PyPtr::steal(PyCapsule_New(x, "Example1", &destroy));
     }
 
-    static int check1(bp3::PyPtr const & ptr, bp3::converter_data &) {
+    static int check1(bp3::PyPtr const & ptr, bp3::ConverterData &) {
         if (PyCapsule_IsValid(ptr.get(), "Example1")) return 0;
         return -1;
     }
 
-    static void * convert1(bp3::PyPtr const & ptr, bp3::converter_data &) {
+    static void * convert1(bp3::PyPtr const & ptr, bp3::ConverterData &) {
         return PyCapsule_GetPointer(ptr.get(), "Example1");
     }
 
@@ -47,7 +47,7 @@ template <typename T>
 static PyObject * check_rv(PyObject * self, PyObject * arg) {
     bp3::PyPtr py1 = bp3::PyPtr::borrow(arg);
     assert(mod);
-    bp3::conversion::from_python<T> converter(*mod, py1);
+    bp3::FromPython<T> converter(*mod, py1);
     if (!converter.is_convertible()) {
         Py_RETURN_FALSE;
     }
@@ -62,7 +62,7 @@ template <typename T>
 static PyObject * check_ptr(PyObject * self, PyObject * arg) {
     bp3::PyPtr py1 = bp3::PyPtr::borrow(arg);
     assert(mod);
-    bp3::conversion::from_python<T> converter(*mod, py1);
+    bp3::FromPython<T> converter(*mod, py1);
     if (!converter.is_convertible()) {
         Py_RETURN_FALSE;
     }

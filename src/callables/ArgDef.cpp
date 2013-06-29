@@ -1,10 +1,9 @@
-#include "bp3/keywords.hpp"
+#include "bp3/callables/ArgDef.hpp"
 #include "bp3/builtin/str.hpp"
 #include <cstring>
 #include <vector>
 
-namespace bp3 {
-
+namespace bp3 { namespace callables {
 /*
  * For overloaded functions/methods, throw_on_failure is false, and we
  * just rely on the return value to indicate success (true) or failure
@@ -14,7 +13,7 @@ namespace bp3 {
  * For non-overloaded functions, throw_on_failure is true, so we can
  * raise more desciptive exceptions within this routine.
  */
-bool arg_def_list::parse(
+bool ArgDefList::parse(
     std::string const & function_name,
     PyPtr const & pyargs, PyPtr const & pykwds,
     std::vector<PyPtr> & output,
@@ -84,7 +83,7 @@ bool arg_def_list::parse(
     return true;
 }
 
-void arg_def_list::validate(std::size_t n_args) {
+void ArgDefList::validate(std::size_t n_args) {
     if (n_args > _vec.size()) {
         _vec.insert(_vec.begin(), arg("self"));
     }
@@ -92,4 +91,4 @@ void arg_def_list::validate(std::size_t n_args) {
     //       and defaults that aren't at the end.
 }
 
-} // namespace bp3
+}} // namespace bp3::callables

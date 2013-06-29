@@ -2,7 +2,7 @@
 #define BP3_Module_hpp_INCLUDED
 
 #include "bp3/TypeInfo.hpp"
-#include "bp3/conversion/from_python_base.hpp"
+#include "bp3/FromPythonBase.hpp"
 #include "bp3/builtin/exceptions.hpp"
 
 #include <string>
@@ -50,11 +50,7 @@
 
 namespace bp3 {
 
-namespace conversion {
-
-class registration;
-
-} // namespace conversion
+class Registration;
 
 class Module {
 public:
@@ -63,23 +59,23 @@ public:
 
     void add(std::string const & name, PyPtr const & ptr);
 
-    std::shared_ptr<conversion::registration> lookup(bp3::TypeInfo const & t) const;
+    std::shared_ptr<Registration> lookup(TypeInfo const & t) const;
 
-    void register_from_python(
-        bp3::TypeInfo const & t, bool is_lvalue,
-        conversion::from_python_check_func check,
-        conversion::from_python_convert_func convert,
-        conversion::from_python_postcall_func postcall,
-        conversion::from_python_cleanup_func cleanup=nullptr
+    void registerFromPython(
+        TypeInfo const & t, bool is_lvalue,
+        FromPythonCheckFunc check,
+        FromPythonConvertFunc convert,
+        FromPythonPostcallFunc postcall,
+        FromPythonCleanupFunc cleanup=nullptr
     );
 
     void register_from_python(
-        bp3::TypeInfo const & t, bool is_lvalue,
-        conversion::from_python_check_func check,
-        conversion::from_python_convert_func convert,
-        conversion::from_python_cleanup_func cleanup=nullptr
+        TypeInfo const & t, bool is_lvalue,
+        FromPythonCheckFunc check,
+        FromPythonConvertFunc convert,
+        FromPythonCleanupFunc cleanup=nullptr
     ) {
-        register_from_python(t, is_lvalue, check, convert, nullptr, cleanup);
+        registerFromPython(t, is_lvalue, check, convert, nullptr, cleanup);
     }
 
     ~Module();

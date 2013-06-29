@@ -1,5 +1,5 @@
 #include "bp3/Module.hpp"
-#include "bp3/conversion/registration.hpp"
+#include "bp3/Registration.hpp"
 
 #include <cstring>
 #include <map>
@@ -8,20 +8,20 @@ namespace bp3 {
 
 namespace {
 
-struct compare_TypeInfo {
+struct compareTypeInfo {
     bool operator()(bp3::TypeInfo const & a, bp3::TypeInfo const & b) const {
         return std::strcmp(a.name(), b.name()) < 0;
     }
 };
 
-typedef std::map<bp3::TypeInfo,std::shared_ptr<conversion::registration>,compare_TypeInfo> registry_map;
+typedef std::map<bp3::TypeInfo,std::shared_ptr<Registration>,compareTypeInfo> RegistryMap;
 
-registry_map & extract(PyPtr const & pyregistry) {
-    return *reinterpret_cast<registry_map*>(PyCapsule_GetPointer(pyregistry.get(), "bp3.registry"));
+RegistryMap & extract(PyPtr const & pyregistry) {
+    return *reinterpret_cast<RegistryMap*>(PyCapsule_GetPointer(pyregistry.get(), "bp3.registry"));
 }
 
-void destroy_registry_map(PyObject * capsule) {
-    registry_map * p = reinterpret_cast<registry_map*>(PyCapsule_GetPointer(capsule, "bp3.registry"));
+void destroyRegistryMap(PyObject * capsule) {
+    RegistryMap * p = reinterpret_cast<RegistryMap*>(PyCapsule_GetPointer(capsule, "bp3.registry"));
     delete p;
 }
 
@@ -33,34 +33,34 @@ void Module::add(std::string const & name, PyPtr const & ptr) {
     }
 }
 
-std::shared_ptr<conversion::registration> Module::lookup(bp3::TypeInfo const & t) const {
-    registry_map & registry = extract(_pyregistry);
-    registry_map::const_iterator iter = registry.find(t);
-    std::shared_ptr<conversion::registration> result;
+std::shared_ptr<Registration> Module::lookup(bp3::TypeInfo const & t) const {
+    RegistryMap & registry = extract(_pyregistry);
+    RegistryMap::const_iterator iter = registry.find(t);
+    std::shared_ptr<Registration> result;
     if (iter != registry.end()) result = iter->second;
     return result;
 }
 
-void Module::register_from_python(
-    bp3::TypeInfo const & t, bool is_lvalue,
-    conversion::from_python_check_func check,
-    conversion::from_python_convert_func convert,
-    conversion::from_python_postcall_func postcall,
-    conversion::from_python_cleanup_func cleanup
+void Module::registerFromPython(
+    TypeInfo const & t, bool is_lvalue,
+    FromPythonCheckFunc check,
+    FromPythonConvertFunc convert,
+    FromPythonPostcallFunc postcall,
+    FromPythonCleanupFunc cleanup
 ) {
-    registry_map & registry = extract(_pyregistry);
-    std::shared_ptr<conversion::registration> & reg = registry[t];
+    RegistryMap & registry = extract(_pyregistry);
+    std::shared_ptr<Registration> & reg = registry[t];
     if (!reg) {
-        reg = std::make_shared<conversion::registration>();
+        reg = std::make_shared<Registration>();
     }
     reg->from_python.front()->push_front(
-        conversion::from_python_funcs{is_lvalue, check, convert, postcall, cleanup}
+        FromPythonFuncs{is_lvalue, check, convert, postcall, cleanup}
     );
 }
 
 Module::Module(PyPtr const & pymod) :
     _pymod(pymod),
-    _pyregistry(PyPtr::steal(PyCapsule_New(new registry_map, "bp3.registry", destroy_registry_map)))
+    _pyregistry(PyPtr::steal(PyCapsule_New(new RegistryMap, "bp3.registry", destroyRegistryMap)))
 {
     PyModule_AddObject(pymod.get(), "registry", _pyregistry.incref());
     // TODO: add default converters
