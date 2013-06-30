@@ -5,6 +5,7 @@
 
 #include <typeinfo>
 #include <cstring>
+#include <string>
 
 namespace bp3 {
 
@@ -20,7 +21,7 @@ namespace bp3 {
  || (defined(__hpux) && defined(__HP_aCC)) \
  || (defined(linux) && defined(__INTEL_COMPILER) && defined(__ICC))
 #define BP3_TYPE_ID_NAME
-#endif 
+#endif
 
 struct TypeInfo {
 
@@ -29,6 +30,8 @@ struct TypeInfo {
     inline bool operator==(TypeInfo const & other) const;
 
     char const * name() const;
+
+    std::string demangle() const;
 
  private:
 #ifdef BP3_TYPE_ID_NAME
