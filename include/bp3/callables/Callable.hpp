@@ -2,7 +2,6 @@
 #define BP3_CALLABLES_Callable_hpp_INCLUDED
 
 #include "bp3/PyPtr.hpp"
-#include "bp3/callables/ArgDef.hpp"
 #include "bp3/callables/Overload.hpp"
 #include "bp3/callables/ArgsFromPython.hpp"
 #include "bp3/Module.hpp"
@@ -18,16 +17,16 @@ public:
     PyPtr call(PyPtr const & args, PyPtr const & kwds) const;
 
     template <typename F>
-    void addOverload(F func, ArgDefList kwargs) {
-        _overloads.push_back(make_overload(std::move(func), std::move(kwargs)));
+    void addOverload(F func, std::vector<std::string> kwd_names) {
+        _overloads.push_back(make_overload(std::move(func), std::move(kwd_names)));
     }
 
     template <typename F>
     Callable(
         Module const & mod, std::string const & name,
-        F func, ArgDefList kwargs
+        F func, std::vector<std::string> kwd_names
     ) : _name(name), _mod(mod), _overloads() {
-        addOverload(func, kwargs);
+        addOverload(func, kwd_names);
     }
 
 protected:

@@ -2,10 +2,11 @@
 #define BP3_Overload_hpp_INCLUDED
 
 #include "bp3/PyPtr.hpp"
-#include "bp3/callables/ArgDef.hpp"
 #include "bp3/callables/ArgsFromPython.hpp"
 #include "bp3/Module.hpp"
 
+#include <vector>
+#include <string>
 #include <functional>
 
 namespace bp3 {
@@ -23,8 +24,9 @@ public:
     OverloadBase() = delete;
 
     void unpackArgs(
-        std::string const & name, PyPtr const & args, PyPtr const & kwds, OverloadData & data,
-        bool throw_on_failure
+        std::string const & func_name,
+        PyPtr const & pyargs, PyPtr const & pykwds,
+        OverloadData & data, bool throw_on_failure
     ) const;
 
     virtual void convertArgs(Module const & mod, OverloadData & data) const = 0;
@@ -35,52 +37,67 @@ public:
 
 protected:
 
-    explicit OverloadBase(std::size_t n_args, ArgDefList const & arg_defs);
+    OverloadBase(std::size_t n_args, std::vector<std::string> kwd_names);
 
-    ArgDefList _arg_defs;
+    std::vector<std::string> _kwd_names;
 };
 
 typedef std::unique_ptr<OverloadBase> OverloadPtr;
 
 template <typename Result, typename ...Args>
+struct Signature {
+
+    static std::size_t const n_args = sizeof...(Args);
+    typedef std::function<Result(Args...)> Function;
+    typedef ArgsFromPython<Args...> ArgConverter;
+};
+
+template <typename Sig, typename Defaults=void>
 class Overload : public OverloadBase {
 public:
 
+    typedef typename Sig::Function Function;
+    typedef typename Sig::ArgConverter ArgConverter;
+
     virtual void convertArgs(Module const & mod, OverloadData & data) const {
         data.converted_args.reset(
-            new ArgsFromPython<Args...>(mod, data.unpacked_args)
+            new ArgConverter(mod, data.unpacked_args)
         );
     }
 
-    Overload(std::function<Result(Args...)> func, ArgDefList arg_defs) :
-        OverloadBase(sizeof...(Args), std::move(arg_defs)), _func(std::move(func))
+    Overload(Function func, std::vector<std::string> kwd_names) :
+        OverloadBase(Sig::n_args, std::move(kwd_names)), _func(std::move(func))
     {}
 
 private:
-    std::function<Result(Args...)> _func;
+    Function _func;
 };
 
 template <typename Result, typename ...Args>
-inline OverloadPtr makeOverload(Result func(Args...), ArgDefList arg_defs) {
-    OverloadPtr p(new Overload<Result,Args...>(func, std::move(arg_defs)));
+inline OverloadPtr makeOverload(Result func(Args...), std::vector<std::string> kwd_names) {
+    typedef Signature<Result,Args...> Sig;
+    OverloadPtr p(new Overload<Sig>(func, std::move(kwd_names)));
     return p;
 }
 
 template <typename Result, typename Class, typename ...Args>
-inline OverloadPtr makeOverload(Result (Class::*func)(Args...), ArgDefList arg_defs) {
-    OverloadPtr p(new Overload<Result, Class &, Args...>(func, std::move(arg_defs)));
+inline OverloadPtr makeOverload(Result (Class::*func)(Args...), std::vector<std::string> kwd_names) {
+    typedef Signature<Result, Class &, Args...> Sig;
+    OverloadPtr p(new Overload<Sig>(func, std::move(kwd_names)));
     return p;
 }
 
 template <typename Result, typename Class, typename ...Args>
-inline OverloadPtr makeOverload(Result (Class::*func)(Args...) const, ArgDefList arg_defs) {
-    OverloadPtr p(new Overload<Result, Class const &, Args...>(func, std::move(arg_defs)));
+inline OverloadPtr makeOverload(Result (Class::*func)(Args...) const, std::vector<std::string> kwd_names) {
+    typedef Signature<Result, Class const &, Args...> Sig;
+    OverloadPtr p(new Overload<Sig>(func, std::move(kwd_names)));
     return p;
 }
 
 template <typename Result, typename ...Args>
-inline OverloadPtr makeOverload(std::function<Result(Args...)> func, ArgDefList arg_defs) {
-    OverloadPtr p(new Overload<Result, Args...>(std::move(func), std::move(arg_defs)));
+inline OverloadPtr makeOverload(std::function<Result(Args...)> func, std::vector<std::string> kwd_names) {
+    typedef Signature<Result, Args...> Sig;
+    OverloadPtr p(new Overload<Sig>(std::move(func), std::move(kwd_names)));
     return p;
 }
 

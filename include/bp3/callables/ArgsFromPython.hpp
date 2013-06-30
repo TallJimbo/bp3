@@ -3,6 +3,8 @@
 
 #include "bp3/FromPython.hpp"
 
+#include <vector>
+
 namespace bp3 { namespace callables {
 
 struct ArgsFromPythonBase {

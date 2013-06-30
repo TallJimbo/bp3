@@ -29,7 +29,6 @@ add_custom_command(
 add_library(bp3 ${LIBRARY_TYPE}
   # header files
   include/bp3/utils/Any.hpp
-  include/bp3/callables/ArgDef.hpp
   include/bp3/callables/Overload.hpp
   include/bp3/callables/Callable.hpp
   include/bp3/callables/ArgsFromPython.hpp
@@ -47,7 +46,6 @@ add_library(bp3 ${LIBRARY_TYPE}
   include/bp3/PyPtr.hpp
   include/bp3/Module.hpp
   # source files
-  src/callables/ArgDef.cpp
   src/callables/Overload.cpp
   src/callables/Callable.cpp
   src/Module.cpp
