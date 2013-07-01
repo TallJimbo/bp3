@@ -1,5 +1,6 @@
 #include "bp3/Module.hpp"
 #include "bp3/Registration.hpp"
+#include "bp3/builtin/numbers.hpp"
 
 #include <cstring>
 #include <map>
@@ -7,6 +8,96 @@
 namespace bp3 {
 
 namespace {
+
+template <typename T>
+struct FloatConverters {
+
+    static int check(PyPtr const & py, ConverterData & data) {
+        if (PyFloat_CheckExact(py.get())) {
+            return 0;
+        }
+        if (PyFloat_Check(py.get())) {
+            return 1;
+        }
+        PyPtr f = PyPtr::steal(PyNumber_Float(py.get()));
+        if (!f) {
+            PyErr_Clear();
+            return -1;
+        }
+        data.scratch1 = f.release();
+        return 2;
+    }
+
+    static void * convert(PyPtr const & py, ConverterData & data) {
+        PyObject * p = (data.scratch1) ? (PyObject*)data.scratch1 : py.get();
+        data.scratch2 = new T(PyFloat_AsDouble(p));
+        return data.scratch2;
+    }
+
+    static void cleanup(ConverterData & data) {
+        Py_XDECREF((PyObject*)data.scratch1);
+        delete reinterpret_cast<T*>(data.scratch2);
+    }
+
+    static void declare(Module & module) {
+        module.registerFromPython(makeTypeInfo<T>(), false, check, convert, cleanup);
+    }
+
+};
+
+template <typename T>
+struct IntConverters {
+
+    static int check(PyPtr const & py, ConverterData & data) {
+#if PY_MAJOR_VERSION == 2
+        if (PyInt_CheckExact(py.get())) {
+            return 0;
+        }
+#endif
+        if (PyLong_CheckExact(py.get())) {
+            return 0;
+        }
+#if PY_MAJOR_VERSION == 2
+        if (PyInt_Check(py.get())) {
+            return 1;
+        }
+#endif
+        if (PyLong_Check(py.get())) {
+            return 0;
+        }
+        PyPtr f = PyPtr::steal(PyNumber_Long(py.get()));
+        if (!f) {
+            PyErr_Clear();
+            return -1;
+        }
+        data.scratch1 = f.release();
+        return 2;
+    }
+
+    static void * convert(PyPtr const & py, ConverterData & data) {
+        PyObject * p = (data.scratch1) ? (PyObject*)data.scratch1 : py.get();
+        if (data.scratch1) {
+            if (std::is_signed<T>::value) {
+                data.scratch2 = new T(PyLong_AsLongLong(p));
+            } else {
+                data.scratch2 = new T(PyLong_AsUnsignedLongLong(p));
+            }
+        }
+        return data.scratch2;
+    }
+
+    static void cleanup(ConverterData & data) {
+        Py_XDECREF((PyObject*)data.scratch1);
+        delete reinterpret_cast<T*>(data.scratch2);
+    }
+
+    static void declare(Module & module) {
+        module.registerFromPython(makeTypeInfo<T>(), false, check, convert, cleanup);
+    }
+
+};
+
+
 
 struct compareTypeInfo {
     bool operator()(bp3::TypeInfo const & a, bp3::TypeInfo const & b) const {
@@ -80,6 +171,16 @@ void Module::registerFromPython(
 Module::Module(char const * name, PyPtr const & pymodule) :
     _pymodule(pymodule), _registry(Registry::make(name, _pymodule, _pyregistry))
 {
+    FloatConverters<float>::declare(*this);
+    FloatConverters<double>::declare(*this);
+    IntConverters<short>::declare(*this);
+    IntConverters<unsigned short>::declare(*this);
+    IntConverters<int>::declare(*this);
+    IntConverters<unsigned int>::declare(*this);
+    IntConverters<long>::declare(*this);
+    IntConverters<unsigned long>::declare(*this);
+    IntConverters<long long>::declare(*this);
+    IntConverters<unsigned long long>::declare(*this);
     // TODO: add default converters
 }
 
