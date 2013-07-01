@@ -70,7 +70,7 @@ public:
         FromPythonCleanupFunc cleanup=nullptr
     );
 
-    void register_from_python(
+    void registerFromPython(
         TypeInfo const & t, bool is_lvalue,
         FromPythonCheckFunc check,
         FromPythonConvertFunc convert,
