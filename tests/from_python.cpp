@@ -48,7 +48,7 @@ static PyObject * check_rv(PyObject * self, PyObject * arg) {
     bp3::PyPtr py1 = bp3::PyPtr::borrow(arg);
     assert(mod);
     bp3::FromPython<T> converter(*mod, py1);
-    if (!converter.is_convertible()) {
+    if (!converter.isConvertible()) {
         Py_RETURN_FALSE;
     }
     T ex1 = converter.convert();
@@ -63,7 +63,7 @@ static PyObject * check_ptr(PyObject * self, PyObject * arg) {
     bp3::PyPtr py1 = bp3::PyPtr::borrow(arg);
     assert(mod);
     bp3::FromPython<T> converter(*mod, py1);
-    if (!converter.is_convertible()) {
+    if (!converter.isConvertible()) {
         Py_RETURN_FALSE;
     }
     T ex1 = converter.convert();

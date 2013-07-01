@@ -18,7 +18,7 @@ public:
 
     template <typename F>
     void addOverload(F func, std::vector<std::string> kwd_names) {
-        _overloads.push_back(make_overload(std::move(func), std::move(kwd_names)));
+        _overloads.push_back(makeOverload(std::move(func), std::move(kwd_names)));
     }
 
     template <typename F>

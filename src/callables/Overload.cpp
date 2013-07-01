@@ -11,7 +11,7 @@ OverloadBase::OverloadBase(std::size_t n_args, std::vector<std::string> kwd_name
 void OverloadBase::unpackArgs(
     std::string const & function_name,
     PyPtr const & pyargs, PyPtr const & pykwds,
-    OverloadData & data, bool throw_on_failure
+    OverloadResolutionData & data, bool throw_on_failure
 ) const {
     data.unpack_successful = false;
     data.unpacked_args.resize(_kwd_names.size());

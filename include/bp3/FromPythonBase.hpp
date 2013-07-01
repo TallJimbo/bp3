@@ -20,9 +20,11 @@ public:
 
     FromPythonBase & operator=(FromPythonBase const &) = delete;
 
-    bool is_convertible() const { return _penalty >= 0; }
+    bool isConvertible() const { return _penalty >= 0; }
 
-    int penalty() const { return _penalty; }
+    int getPenalty() const { return _penalty; }
+
+    PyPtr getPyObject() const { return _py; }
 
     void postcall();
 
