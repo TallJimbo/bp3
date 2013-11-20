@@ -17,7 +17,6 @@ void f2(int a) {}
 void f3(int a, double b) {}
 
 void wrap(bp3::Module & mod) {
-    bp3::callables::Callable::initTypes();
     bp3::callables::Callable wf1(mod, "f1", f1, {});
     bp3::callables::Callable wf2(mod, "f2", f2, {"a"});
     bp3::callables::Callable wf3(mod, "f3", f3, {"a", "b"});

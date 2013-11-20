@@ -12,6 +12,7 @@
 #define BP3_MODULE(name, callback, methods)                             \
     PyMODINIT_FUNC                                                      \
     init ## name() {                                                    \
+        bp3::PyPtr bp3mod = bp3::PyPtr::steal(PyImport_ImportModule("bp3")); \
         PyObject * m = Py_InitModule(#name, methods);                   \
         if (!m) return;                                                 \
         try {                                                           \
@@ -34,6 +35,7 @@
     };                                                                  \
     PyMODINIT_FUNC                                                      \
     PyInit_ ## name() {                                                 \
+        bp3::PyPtr bp3mod = bp3::PyPtr::steal(PyImport_ImportModule("bp3")); \
         PyObject * m = PyModule_Create(&_bp3_ ## name ## _module_def);  \
         if (!m) return m;                                               \
         try {                                                           \

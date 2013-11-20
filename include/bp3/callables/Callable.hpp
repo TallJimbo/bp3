@@ -5,6 +5,7 @@
 #include "bp3/callables/Overload.hpp"
 #include "bp3/callables/ArgsFromPython.hpp"
 #include "bp3/Module.hpp"
+#include "bp3/library.hpp"
 
 #include <functional>
 
@@ -32,9 +33,11 @@ public:
 
     PyPtr const & ptr() const { return _ptr; }
 
-    static bool initTypes();
-
 private:
+
+    friend class bp3::LibraryAccess;
+
+    static PyPtr initType();
 
     void _initialize(Module mod, std::string name);
     void _addOverload(OverloadPtr overload);

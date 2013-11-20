@@ -157,8 +157,12 @@ void Callable::_addOverload(OverloadPtr overload) {
     impl->addOverload(std::move(overload));
 }
 
-bool Callable::initTypes() {
-    return !::PyType_Ready(&CallableImpl::type);
+PyPtr Callable::initType() {
+    PyPtr r;
+    if (PyType_Ready(&CallableImpl::type) == 0) {
+        r = PyPtr::borrow(reinterpret_cast<PyObject*>(&CallableImpl::type));
+    }
+    return r;
 }
 
 } // namespace callables
