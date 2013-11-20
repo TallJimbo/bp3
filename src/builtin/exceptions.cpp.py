@@ -28,9 +28,9 @@ public:
         PyObject* ptraceback = nullptr;
         PyErr_Fetch(&ptype, &pvalue, &ptraceback);
         PyErr_NormalizeException(&ptype, &pvalue, &ptraceback);
-        py_ptr type = py_ptr::steal(ptype);
-        py_ptr value = py_ptr::steal(pvalue);
-        py_ptr traceback = py_ptr::steal(ptraceback);
+        PyPtr type = PyPtr::steal(ptype);
+        PyPtr value = PyPtr::steal(pvalue);
+        PyPtr traceback = PyPtr::steal(ptraceback);
         throw ExceptionT(value, traceback);
     }}
 
@@ -44,9 +44,9 @@ struct exception_factory_base {{
 
     static exception_factory_base * root();
 
-    static exception_factory_base * search(py_ptr const & type);
+    static exception_factory_base * search(PyPtr const & type);
 
-    virtual MatchEnum match(py_ptr const & type) const = 0;
+    virtual MatchEnum match(PyPtr const & type) const = 0;
 
     virtual void fetch_and_throw() const = 0;
 
@@ -58,7 +58,7 @@ struct exception_factory_base {{
     exception_factory_base * derived;
 }};
 
-exception_factory_base * exception_factory_base::search(py_ptr const & target) {{
+exception_factory_base * exception_factory_base::search(PyPtr const & target) {{
     exception_factory_base * current = root();
     exception_factory_base * best = current;
     while (true) {{
@@ -86,7 +86,7 @@ struct exception_factory : public exception_factory_base {{
         exception_access::fetch_and_throw<ExceptionT>();
     }}
 
-    virtual MatchEnum match(py_ptr const & type) const {{
+    virtual MatchEnum match(PyPtr const & type) const {{
         if (type.get() == ExceptionT::typeobject().ptr().get()) return EXACT;
         if (PyObject_IsSubclass(type.get(), ExceptionT::typeobject().ptr().get())) return DERIVED;
         return NONE;
@@ -125,7 +125,7 @@ std::nullptr_t BaseException::release() {{
 }} // namespace builtin
 
 void throw_error_already_set() {{
-    py_ptr type = py_ptr::borrow(PyErr_Occurred());
+    PyPtr type = PyPtr::borrow(PyErr_Occurred());
     if (!type) {{
         builtin::SystemError::raise("C++ exception throw requested with no Python exception set.");
     }}

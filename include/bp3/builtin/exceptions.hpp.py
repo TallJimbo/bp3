@@ -7,11 +7,11 @@ class_decl = """
 class {cls} : public {base} {{
 public:
     {cls}({cls} const & other) : {base}(other) {{}}
-    static type typeobject() {{ return type(py_ptr::borrow(PyExc_{cls})); }}
+    static type typeobject() {{ return type(PyPtr::borrow(PyExc_{cls})); }}
     static void raise(std::string const & what);
 protected:
     friend class detail::exception_access;
-    {cls}(py_ptr const & value, py_ptr const & traceback) : {base}(value, traceback) {{}}
+    {cls}(PyPtr const & value, PyPtr const & traceback) : {base}(value, traceback) {{}}
 }};"""
 
 main = """
@@ -39,7 +39,7 @@ public:
 
     BaseException & operator=(BaseException const &) = delete;
 
-    py_ptr const & ptr() const {{ return _value.ptr(); }}
+    PyPtr const & ptr() const {{ return _value.ptr(); }}
 
     operator object const & () const {{ return _value; }}
 
@@ -47,16 +47,16 @@ public:
 
     static void raise(std::string const & msg);
 
-    static object typeobject() {{ return type(py_ptr::borrow(PyExc_BaseException)); }}
+    static object typeobject() {{ return type(PyPtr::borrow(PyExc_BaseException)); }}
 
 protected:
 
     friend class detail::exception_access;
 
-    BaseException(py_ptr const & value, py_ptr const & traceback) : _value(value), _traceback(traceback) {{}}
+    BaseException(PyPtr const & value, PyPtr const & traceback) : _value(value), _traceback(traceback) {{}}
 
     object _value;
-    py_ptr _traceback;
+    PyPtr _traceback;
 }};
 
 {class_decls}
