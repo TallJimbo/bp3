@@ -29,9 +29,9 @@ add_custom_command(
 add_library(bp3 ${LIBRARY_TYPE}
   # header files
   include/bp3/utils/Any.hpp
-  include/bp3/callables/Overload.hpp
-  include/bp3/callables/Callable.hpp
-  include/bp3/callables/ArgsFromPython.hpp
+  include/bp3/Overload.hpp
+  include/bp3/Callable.hpp
+  include/bp3/ArgsFromPython.hpp
   ${CMAKE_CURRENT_BINARY_DIR}/include/bp3/builtin/exceptions.hpp
   include/bp3/builtin/object.hpp
   include/bp3/builtin/numbers.hpp
@@ -46,8 +46,8 @@ add_library(bp3 ${LIBRARY_TYPE}
   include/bp3/PyPtr.hpp
   include/bp3/Module.hpp
   # source files
-  src/callables/Overload.cpp
-  src/callables/Callable.cpp
+  src/Overload.cpp
+  src/Callable.cpp
   src/Module.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/src/builtin/exceptions.cpp
   src/builtin/object.cpp

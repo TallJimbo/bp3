@@ -1,5 +1,5 @@
-#ifndef BP3_CALLABLES_ArgsFromPython_hpp_INCLUDED
-#define BP3_CALLABLES_ArgsFromPython_hpp_INCLUDED
+#ifndef BP3_ArgsFromPython_hpp_INCLUDED
+#define BP3_ArgsFromPython_hpp_INCLUDED
 
 #include "bp3/FromPython.hpp"
 #include "bp3/builtin/str.hpp"
@@ -8,7 +8,7 @@
 #include <iostream>
 #include <algorithm>
 
-namespace bp3 { namespace callables {
+namespace bp3 {
 
 struct OverloadScore {
 
@@ -129,6 +129,6 @@ struct NthArg<0, ArgsFromPython<T,E...>> {
     typedef T Type;
 };
 
-}} // namespace bp3::callables
+} // namespace bp3
 
-#endif // !BP3_CALLABLES_ArgsFromPython_hpp_INCLUDED
+#endif // !BP3_ArgsFromPython_hpp_INCLUDED

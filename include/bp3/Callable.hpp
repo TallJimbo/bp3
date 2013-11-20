@@ -1,16 +1,15 @@
-#ifndef BP3_CALLABLES_Callable_hpp_INCLUDED
-#define BP3_CALLABLES_Callable_hpp_INCLUDED
+#ifndef BP3_Callable_hpp_INCLUDED
+#define BP3_Callable_hpp_INCLUDED
 
 #include "bp3/PyPtr.hpp"
-#include "bp3/callables/Overload.hpp"
-#include "bp3/callables/ArgsFromPython.hpp"
+#include "bp3/Overload.hpp"
+#include "bp3/ArgsFromPython.hpp"
 #include "bp3/Module.hpp"
 #include "bp3/library.hpp"
 
 #include <functional>
 
 namespace bp3 {
-namespace callables {
 
 class Callable {
 public:
@@ -45,7 +44,6 @@ private:
     PyPtr _ptr;
 };
 
-} // namespace callables
 } // namespace bp3
 
-#endif // !BP3_CALLABLES_Callable_hpp_INCLUDED
+#endif // !BP3_Callable_hpp_INCLUDED

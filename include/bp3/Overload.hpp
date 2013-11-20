@@ -2,7 +2,7 @@
 #define BP3_Overload_hpp_INCLUDED
 
 #include "bp3/PyPtr.hpp"
-#include "bp3/callables/ArgsFromPython.hpp"
+#include "bp3/ArgsFromPython.hpp"
 #include "bp3/Module.hpp"
 
 #include <vector>
@@ -10,7 +10,6 @@
 #include <functional>
 
 namespace bp3 {
-namespace callables {
 
 struct OverloadResolutionData;
 
@@ -94,7 +93,6 @@ inline OverloadPtr makeOverload(std::function<Result(Args...)> func, std::vector
     return p;
 }
 
-} // namespace callables
 } // namespace bp3
 
 #endif // !BP3_Overload_hpp_INCLUDED

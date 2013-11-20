@@ -1,9 +1,8 @@
-#include "bp3/callables/Callable.hpp"
+#include "bp3/Callable.hpp"
 #include <sstream>
 #include <list>
 
 namespace bp3 {
-namespace callables {
 
 namespace {
 
@@ -165,5 +164,4 @@ PyPtr Callable::initType() {
     return r;
 }
 
-} // namespace callables
 } // namespace bp3

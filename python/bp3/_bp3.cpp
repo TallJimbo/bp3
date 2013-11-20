@@ -1,5 +1,5 @@
 #include "bp3/Module.hpp"
-#include "bp3/callables/Callable.hpp"
+#include "bp3/Callable.hpp"
 
 #include <iostream>
 #include <string>
@@ -10,7 +10,7 @@ class LibraryAccess {
 public:
 
     static void initTypes(Module & module) {
-        module.add("Callable", bp3::callables::Callable::initType());
+        module.add("Callable", bp3::Callable::initType());
     }
 };
 

@@ -1,8 +1,7 @@
-#include "bp3/callables/Overload.hpp"
+#include "bp3/Overload.hpp"
 #include "bp3/builtin/str.hpp"
 
 namespace bp3 {
-namespace callables {
 
 OverloadBase::OverloadBase(std::size_t n_args, std::vector<std::string> kwd_names) : _kwd_names(kwd_names) {
     assert(kwd_names.size() == n_args); // TODO: more complete validation, better exception
@@ -78,5 +77,4 @@ void OverloadBase::unpackArgs(
     data.unpack_successful = true;
 }
 
-} // namespace callables
 } // namespace bp3
