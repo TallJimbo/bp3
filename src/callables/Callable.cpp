@@ -5,28 +5,54 @@
 namespace bp3 {
 namespace callables {
 
-PyPtr Callable::call(PyPtr const & args, PyPtr const & kwds) const {
+namespace {
+
+struct CallableImpl : public ::PyObject {
+
+    static ::PyObject * call(::PyObject * self, ::PyObject * args, ::PyObject * kwds);
+
+    static PyTypeObject type;
+
+    static void destroy(::PyObject * self);
+
+    void addOverload(OverloadPtr overload) { _overloads.push_back(std::move(overload)); }
+
+    CallableImpl(Module mod, std::string name) : _name(std::move(name)), _mod(std::move(mod)) {
+        PyObject_Init(this, &type);
+    }
+
+private:
+    std::string _name;
+    Module _mod;
+    std::vector<OverloadPtr> _overloads;
+};
+
+::PyObject * CallableImpl::call(::PyObject * self, ::PyObject * args, ::PyObject * kwds) {
     try {
-        if (_overloads.size() == static_cast<std::size_t>(1)) {
-            OverloadResolutionData data(_overloads.front());
-            data.overload->unpackArgs(_name, args, kwds, data, true);
+        if (self->ob_type != &CallableImpl::type) {
+            builtin::TypeError::raise("First argument must be a bp3.Callable instance");
+        }
+        CallableImpl * impl = static_cast<CallableImpl*>(self);
+        if (impl->_overloads.size() == static_cast<std::size_t>(1)) {
+            OverloadResolutionData data(impl->_overloads.front());
+            data.overload->unpackArgs(impl->_name, PyPtr::borrow(args), PyPtr::borrow(kwds), data, true);
             assert(data.unpack_successful);  // or we should have thrown
-            data.overload->convertArgs(_mod, data);
+            data.overload->convertArgs(impl->_mod, data);
             if (!data.converted_args->score.isValid()) {
                 std::ostringstream msg;
-                msg << "Error in arguments for '" << _name << "'";
+                msg << "Error in arguments for '" << impl->_name << "'";
                 data.converted_args->reportConversionFailure(msg, "\n  ");
                 builtin::TypeError::raise(msg.str());
             }
             // TODO: actually calling the C++ func.
         } else {
             typedef std::list<OverloadResolutionData> DataList;
-            DataList data(_overloads.begin(), _overloads.end());
+            DataList data(impl->_overloads.begin(), impl->_overloads.end());
             DataList::iterator i = data.begin();
             while (i != data.end()) {
-                i->overload->unpackArgs(_name, args, kwds, *i, false);
+                i->overload->unpackArgs(impl->_name, PyPtr::borrow(args), PyPtr::borrow(kwds), *i, false);
                 if (i->unpack_successful) {
-                    i->overload->convertArgs(_mod, *i);
+                    i->overload->convertArgs(impl->_mod, *i);
                     if (i->converted_args->score.isValid()) {
                         ++i;
                     } else {
@@ -39,7 +65,7 @@ PyPtr Callable::call(PyPtr const & args, PyPtr const & kwds) const {
             }
             if (data.empty()) {
                 builtin::TypeError::raise("No matching signatures for call to overloaded function '"
-                                          + _name + "'");
+                                          + impl->_name + "'");
             }
             DataList::iterator best = data.begin();
             i = data.begin(); ++i;
@@ -55,18 +81,84 @@ PyPtr Callable::call(PyPtr const & args, PyPtr const & kwds) const {
             }
             if (data.size() != 1) {
                 // TODO: diagnostics for ambiguous calls
-                builtin::TypeError::raise("Ambiguous call to overloaded function '" + _name + "'");
+                builtin::TypeError::raise("Ambiguous call to overloaded function '" + impl->_name + "'");
             }
             // TODO: actually calling the C++ func;
         }
-        return PyPtr::borrow(Py_None);
+        Py_RETURN_NONE;
     } catch (builtin::Exception & err) {
         err.release();
-        return PyPtr();
+        return nullptr;
     } catch (...) {
         PyErr_SetString(PyExc_RuntimeError, "unknown C++ exception");
-        return PyPtr();
+        return nullptr;
     }
+}
+
+void CallableImpl::destroy(::PyObject * self) {
+    delete static_cast<CallableImpl*>(self);
+}
+
+PyTypeObject CallableImpl::type = {
+    PyObject_HEAD_INIT(NULL)
+    0,                         /*ob_size*/
+    "bp3.Callable",            /*tp_name*/
+    sizeof(CallableImpl),      /*tp_basicsize*/
+    0,                         /*tp_itemsize*/
+    (destructor)&CallableImpl::destroy,    /*tp_dealloc*/
+    0,                         /*tp_print*/
+    0,                         /*tp_getattr*/
+    0,                         /*tp_setattr*/
+    0,                         /*tp_compare*/
+    0,                         /*tp_repr*/
+    0,                         /*tp_as_number*/
+    0,                         /*tp_as_sequence*/
+    0,                         /*tp_as_mapping*/
+    0,                         /*tp_hash */
+    (ternaryfunc)&CallableImpl::call,       /*tp_call*/
+    0,                         /*tp_str*/
+    0,                         /*tp_getattro*/
+    0,                         /*tp_setattro*/
+    0,                         /*tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT,        /*tp_flags*/
+    "bp3-wrapped C++ function or function object",           /* tp_doc */
+    0,		                   /* tp_traverse */
+    0,		                   /* tp_clear */
+    0,		                   /* tp_richcompare */
+    0,		                   /* tp_weaklistoffset */
+    0,		                   /* tp_iter */
+    0,		                   /* tp_iternext */
+    0,                         /* tp_methods */
+    0,                         /* tp_members */
+    0,                         /* tp_getset */
+    0,                         /* tp_base */
+    0,                         /* tp_dict */
+    0,                         /* tp_descr_get */
+    0,                         /* tp_descr_set */
+    0,                         /* tp_dictoffset */
+    0,                         /* tp_init */
+    0,                         /* tp_alloc */
+    0,                         /* tp_new */
+    0,                         /* tp_free */
+};
+
+} // anonymous
+
+PyPtr Callable::call(PyPtr const & args, PyPtr const & kwds) const {
+    return PyPtr::borrow(CallableImpl::call(_ptr.get(), args.get(), kwds.get())).raise_if_null();
+}
+
+void Callable::_initialize(Module mod, std::string name) {
+    _ptr = PyPtr::steal(new CallableImpl(std::move(mod), std::move(name)));
+}
+
+void Callable::_addOverload(OverloadPtr overload) {
+    CallableImpl * impl = static_cast<CallableImpl*>(_ptr.get());
+    impl->addOverload(std::move(overload));
+}
+
+bool Callable::initTypes() {
+    return !::PyType_Ready(&CallableImpl::type);
 }
 
 } // namespace callables

@@ -18,21 +18,28 @@ public:
 
     template <typename F>
     void addOverload(F func, std::vector<std::string> kwd_names) {
-        _overloads.push_back(makeOverload(std::move(func), std::move(kwd_names)));
+        _addOverload(makeOverload(std::move(func), std::move(kwd_names)));
     }
 
     template <typename F>
     Callable(
-        Module const & mod, std::string const & name,
+        Module mod, std::string name,
         F func, std::vector<std::string> kwd_names
-    ) : _name(name), _mod(mod), _overloads() {
-        addOverload(func, kwd_names);
+    ) {
+        _initialize(std::move(mod), std::move(name));
+        addOverload(func, std::move(kwd_names));
     }
 
-protected:
-    std::string _name;
-    Module _mod;
-    std::vector<OverloadPtr> _overloads;
+    PyPtr const & ptr() const { return _ptr; }
+
+    static bool initTypes();
+
+private:
+
+    void _initialize(Module mod, std::string name);
+    void _addOverload(OverloadPtr overload);
+
+    PyPtr _ptr;
 };
 
 } // namespace callables
