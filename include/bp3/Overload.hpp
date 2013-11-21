@@ -3,7 +3,7 @@
 
 #include "bp3/PyPtr.hpp"
 #include "bp3/ArgsFromPython.hpp"
-#include "bp3/Module.hpp"
+#include "bp3/Registry.hpp"
 
 #include <vector>
 #include <string>
@@ -24,7 +24,7 @@ public:
         OverloadResolutionData & data, bool throw_on_failure
     ) const;
 
-    virtual void convertArgs(Module const & mod, OverloadResolutionData & data) const = 0;
+    virtual void convertArgs(Registry const & registry, OverloadResolutionData & data) const = 0;
 
 #if 0
     virtual void call(OverloadResolutionData & data) const = 0;
@@ -55,9 +55,9 @@ template <typename Result, typename ...Args>
 class Overload : public OverloadBase {
 public:
 
-    virtual void convertArgs(Module const & mod, OverloadResolutionData & data) const {
+    virtual void convertArgs(Registry const & registry, OverloadResolutionData & data) const {
         data.converted_args.reset(
-            new ArgsFromPython<Args...>(mod, data.unpacked_args)
+            new ArgsFromPython<Args...>(registry, data.unpacked_args)
         );
     }
 

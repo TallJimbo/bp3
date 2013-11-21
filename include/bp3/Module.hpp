@@ -4,6 +4,7 @@
 #include "bp3/TypeInfo.hpp"
 #include "bp3/FromPythonBase.hpp"
 #include "bp3/builtin/exceptions.hpp"
+#include "bp3/Registry.hpp"
 
 #include <string>
 #include <memory>
@@ -53,41 +54,19 @@
 namespace bp3 {
 
 class Registration;
-class Registry;
 
 class Module {
 public:
 
     Module(char const * name, PyPtr const & pymodule);
 
-    void add(std::string const & name, PyPtr const & ptr);
+    void add(std::string const & name, PyPtr const & ptr) const;
 
-    std::shared_ptr<Registration> lookup(TypeInfo const & t) const;
-
-    void registerFromPython(
-        TypeInfo const & t, bool is_lvalue,
-        FromPythonCheckFunc check,
-        FromPythonConvertFunc convert,
-        FromPythonPostcallFunc postcall,
-        FromPythonCleanupFunc cleanup=nullptr
-    );
-
-    void registerFromPython(
-        TypeInfo const & t, bool is_lvalue,
-        FromPythonCheckFunc check,
-        FromPythonConvertFunc convert,
-        FromPythonCleanupFunc cleanup=nullptr
-    ) {
-        registerFromPython(t, is_lvalue, check, convert, nullptr, cleanup);
-    }
-
-    ~Module();
+    Registry const & getRegistry() const { return _registry; }
 
 private:
-
-    PyPtr _pymodule;
-    PyPtr _pyregistry;
-    Registry * _registry;
+    PyPtr _ptr;
+    Registry _registry;
 };
 
 } // namespace bp3

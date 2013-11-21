@@ -7,13 +7,13 @@
 
 namespace bp3 {
 
-class Module;
+class Registry;
 
 class FromPythonBase {
 public:
 
     explicit FromPythonBase(
-        Module const & mod, PyPtr const & py, bp3::TypeInfo const & ti, bool is_lvalue
+        Registry const & registry, PyPtr const & py, bp3::TypeInfo const & ti, bool is_lvalue
     );
 
     FromPythonBase(FromPythonBase const &) = delete;

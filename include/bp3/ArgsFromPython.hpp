@@ -72,7 +72,7 @@ struct ArgsFromPythonImpl;
 template <std::size_t N>
 struct ArgsFromPythonImpl<N> : public ArgsFromPythonBase {
 
-    explicit ArgsFromPythonImpl(Module const & mod, std::vector<PyPtr> const & unpacked_args) :
+    explicit ArgsFromPythonImpl(Registry const & registryx, std::vector<PyPtr> const & unpacked_args) :
         ArgsFromPythonBase(N)
     {}
 
@@ -84,8 +84,8 @@ struct ArgsFromPythonImpl<N,T,E...> : public ArgsFromPythonImpl<N+1,E...> {
 
     typedef ArgsFromPythonImpl<N+1,E...> BaseT;
 
-    explicit ArgsFromPythonImpl(Module const & mod, std::vector<PyPtr> const & unpacked_args) :
-        BaseT(mod, unpacked_args), _elem(mod, unpacked_args[N])
+    explicit ArgsFromPythonImpl(Registry const & registry, std::vector<PyPtr> const & unpacked_args) :
+        BaseT(registry, unpacked_args), _elem(registry, unpacked_args[N])
     {
         this->score.set(N, _elem.getPenalty());
     }
@@ -108,8 +108,8 @@ class ArgsFromPython : public ArgsFromPythonImpl<0,E...> {
     typedef ArgsFromPythonImpl<0,E...> BaseT;
 public:
 
-    ArgsFromPython(Module const & mod, std::vector<PyPtr> const & unpacked_args) :
-        BaseT(mod, unpacked_args)
+    ArgsFromPython(Registry const & registry, std::vector<PyPtr> const & unpacked_args) :
+        BaseT(registry, unpacked_args)
     {}
 
     virtual void reportConversionFailure(std::ostream & os, std::string const & delimiter) const {

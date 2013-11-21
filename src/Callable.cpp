@@ -16,13 +16,15 @@ struct CallableImpl : public ::PyObject {
 
     void addOverload(OverloadPtr overload) { _overloads.push_back(std::move(overload)); }
 
-    CallableImpl(Module mod, std::string name) : _name(std::move(name)), _mod(std::move(mod)) {
+    CallableImpl(Registry registry, std::string name) :
+        _name(std::move(name)), _registry(std::move(registry))
+    {
         PyObject_Init(this, &type);
     }
 
 private:
     std::string _name;
-    Module _mod;
+    Registry _registry;
     std::vector<OverloadPtr> _overloads;
 };
 
@@ -36,7 +38,7 @@ private:
             OverloadResolutionData data(impl->_overloads.front());
             data.overload->unpackArgs(impl->_name, PyPtr::borrow(args), PyPtr::borrow(kwds), data, true);
             assert(data.unpack_successful);  // or we should have thrown
-            data.overload->convertArgs(impl->_mod, data);
+            data.overload->convertArgs(impl->_registry, data);
             if (!data.converted_args->score.isValid()) {
                 std::ostringstream msg;
                 msg << "Error in arguments for '" << impl->_name << "'";
@@ -51,7 +53,7 @@ private:
             while (i != data.end()) {
                 i->overload->unpackArgs(impl->_name, PyPtr::borrow(args), PyPtr::borrow(kwds), *i, false);
                 if (i->unpack_successful) {
-                    i->overload->convertArgs(impl->_mod, *i);
+                    i->overload->convertArgs(impl->_registry, *i);
                     if (i->converted_args->score.isValid()) {
                         ++i;
                     } else {
@@ -147,8 +149,8 @@ PyPtr Callable::call(PyPtr const & args, PyPtr const & kwds) const {
     return PyPtr::borrow(CallableImpl::call(_ptr.get(), args.get(), kwds.get())).raise_if_null();
 }
 
-void Callable::_initialize(Module mod, std::string name) {
-    _ptr = PyPtr::steal(new CallableImpl(std::move(mod), std::move(name)));
+void Callable::_initialize(Registry registry, std::string name) {
+    _ptr = PyPtr::steal(new CallableImpl(std::move(registry), std::move(name)));
 }
 
 void Callable::_addOverload(OverloadPtr overload) {

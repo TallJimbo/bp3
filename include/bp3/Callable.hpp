@@ -4,7 +4,7 @@
 #include "bp3/PyPtr.hpp"
 #include "bp3/Overload.hpp"
 #include "bp3/ArgsFromPython.hpp"
-#include "bp3/Module.hpp"
+#include "bp3/Registry.hpp"
 #include "bp3/library.hpp"
 
 #include <functional>
@@ -23,10 +23,10 @@ public:
 
     template <typename F>
     Callable(
-        Module mod, std::string name,
+        Registry registry, std::string name,
         F func, std::vector<std::string> kwd_names
     ) {
-        _initialize(std::move(mod), std::move(name));
+        _initialize(std::move(registry), std::move(name));
         addOverload(func, std::move(kwd_names));
     }
 
@@ -38,7 +38,7 @@ private:
 
     static PyPtr initType();
 
-    void _initialize(Module mod, std::string name);
+    void _initialize(Registry registry, std::string name);
     void _addOverload(OverloadPtr overload);
 
     PyPtr _ptr;

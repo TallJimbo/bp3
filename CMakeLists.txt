@@ -42,6 +42,7 @@ add_library(bp3 ${LIBRARY_TYPE}
   include/bp3/FromPythonBase.hpp
   include/bp3/FromPythonFuncs.hpp
   include/bp3/Registration.hpp
+  include/bp3/Registry.hpp
   include/bp3/builtin.hpp
   include/bp3/PyPtr.hpp
   include/bp3/Module.hpp
@@ -56,6 +57,7 @@ add_library(bp3 ${LIBRARY_TYPE}
   src/builtin/sequence.cpp
   src/FromPythonBase.cpp
   src/Registration.cpp
+  src/Registry.cpp
   src/TypeInfo.cpp
 )
 

@@ -47,7 +47,7 @@ template <typename T>
 static PyObject * check_rv(PyObject * self, PyObject * arg) {
     bp3::PyPtr py1 = bp3::PyPtr::borrow(arg);
     assert(mod);
-    bp3::FromPython<T> converter(*mod, py1);
+    bp3::FromPython<T> converter(mod->getRegistry(), py1);
     if (!converter.isConvertible()) {
         Py_RETURN_FALSE;
     }
@@ -62,7 +62,7 @@ template <typename T>
 static PyObject * check_ptr(PyObject * self, PyObject * arg) {
     bp3::PyPtr py1 = bp3::PyPtr::borrow(arg);
     assert(mod);
-    bp3::FromPython<T> converter(*mod, py1);
+    bp3::FromPython<T> converter(mod->getRegistry(), py1);
     if (!converter.isConvertible()) {
         Py_RETURN_FALSE;
     }
@@ -91,7 +91,7 @@ void wrap(bp3::Module & mod_) {
     std::cerr << "checkpoint1\n";
     mod.reset(new bp3::Module(mod_));
     std::cerr << "checkpoint2\n";
-    mod_.registerFromPython(
+    mod_.getRegistry().registerFromPython(
         bp3::makeTypeInfo<Example1>(), true, &Example1::check1, &Example1::convert1
     );
     std::cerr << "checkpoint3\n";

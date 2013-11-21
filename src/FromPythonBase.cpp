@@ -86,13 +86,13 @@ std::tuple<int,FromPythonFuncs*,ConverterData> findFromPythonConverter(
 } // anonymous
 
 FromPythonBase::FromPythonBase(
-    Module const & mod,
+    Registry const & registry,
     PyPtr const & py,
     bp3::TypeInfo const & ti,
     bool is_lvalue
 ) : _py(py), _penalty(-1), _data(), _funcs(nullptr)
 {
-    std::shared_ptr<Registration> reg = mod.lookup(ti);
+    std::shared_ptr<Registration> reg = registry.lookup(ti);
     if (reg) {
         std::tie(_penalty, _funcs, _data) = findFromPythonConverter(reg, py, is_lvalue, 0);
     }
