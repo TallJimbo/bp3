@@ -101,9 +101,8 @@ void CallableImpl::destroy(::PyObject * self) {
 }
 
 PyTypeObject CallableImpl::type = {
-    PyObject_HEAD_INIT(NULL)
-    0,                         /*ob_size*/
-    "bp3.Callable",            /*tp_name*/
+    PyVarObject_HEAD_INIT(NULL, 0)
+    const_cast<char*>("bp3.Callable"), /*tp_name*/
     sizeof(CallableImpl),      /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     (destructor)&CallableImpl::destroy,    /*tp_dealloc*/
