@@ -53,6 +53,15 @@ public:
 
     element_type & operator*() const { return *_p; }
 
+    PyPtr getattr(char const * name, PyPtr default_=PyPtr()) const {
+        PyPtr result = steal(PyObject_GetAttrString(_p, name));
+        if (!result) {
+            result = default_;
+            PyErr_Clear();
+        }
+        return result;
+    }
+
     PyPtr const & raise_if_null() const;
 
     PyPtr const & raise_if_not_isinstance(PyPtr const & cls) const;

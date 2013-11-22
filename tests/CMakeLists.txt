@@ -6,7 +6,7 @@ add_test(from_python ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/from_pyth
 
 python_add_module(callables_mod callables.cpp)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/callables.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-add_test(callbles ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/callables.py")
+add_test(callables ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/callables.py")
 
 target_link_libraries(from_python_mod bp3)
 target_link_libraries(callables_mod bp3)

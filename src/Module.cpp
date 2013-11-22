@@ -1,15 +1,24 @@
 #include "bp3/Module.hpp"
 #include "bp3/Registration.hpp"
-#include "bp3/builtin/numbers.hpp"
+#include "bp3/builtin/str.hpp"
 
 #include <cstring>
 
 namespace bp3 {
 
-Module::Module(char const * name, PyPtr const & ptr) :
-    _ptr(ptr), _registry()
-{
-    add("__bp3_registry__", _registry.ptr());
+Module::Module(PyPtr const & ptr) :
+    _ptr(ptr), _registry(*this, true)
+{}
+
+Module::Module(std::string const & name) :
+    _ptr(PyPtr::steal(PyImport_Import(builtin::str(name).ptr().get())).raise_if_null()),
+    _registry(*this, false)
+{}
+
+Module Module::import(std::string const & name) const {
+    Module module(name);
+    getRegistry().import(module.getRegistry());
+    return module;
 }
 
 void Module::add(std::string const & name, PyPtr const & ptr) const {

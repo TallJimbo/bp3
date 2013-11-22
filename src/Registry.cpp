@@ -1,21 +1,12 @@
 #include "bp3/Callable.hpp"
 #include "bp3/Registration.hpp"
+#include "bp3/Module.hpp"
+
 #include <sstream>
-#include <list>
-#include <map>
-#include <cstring>
 
 namespace bp3 {
 
 namespace {
-
-struct compareTypeInfo {
-    bool operator()(bp3::TypeInfo const & a, bp3::TypeInfo const & b) const {
-        return std::strcmp(a.name(), b.name()) < 0;
-    }
-};
-
-typedef std::map<bp3::TypeInfo,std::shared_ptr<Registration>,compareTypeInfo> RegistryMap;
 
 struct RegistryImpl : public ::PyObject {
 
@@ -27,10 +18,10 @@ struct RegistryImpl : public ::PyObject {
 
     static void destroy(::PyObject * self);
 
-    RegistryMap map;
+    Registration::Map map;
 };
 
-RegistryMap & getMap(Registry const * self) {
+Registration::Map & getMap(Registry const * self) {
     return static_cast<RegistryImpl*>(self->ptr().get())->map;
 }
 
@@ -80,16 +71,56 @@ PyTypeObject RegistryImpl::type = {
     0,                         /* tp_free */
 };
 
+static char const * REGISTRY_ATTRIBUTE_NAME = "__bp3_registry__";
+
 } // anonymous
 
-Registry::Registry() : _ptr(PyPtr::steal(new RegistryImpl())) {}
+Registry::Registry(Module const & module, bool install_if_missing) :
+    _ptr(module.ptr().getattr(REGISTRY_ATTRIBUTE_NAME))
+{
+    if (!_ptr) {
+        if (install_if_missing) {
+            _ptr = PyPtr::steal(new RegistryImpl());
+            module.add(REGISTRY_ATTRIBUTE_NAME, _ptr);
+        } else {
+            builtin::AttributeError::raise("No bp3 registry found"); // TODO better error message
+        }
+    } else if (_ptr->ob_type != &RegistryImpl::type) {
+        builtin::TypeError::raise("Object is not a bp3.Registry instance"); // TODO better error message
+    }
+}
 
 std::shared_ptr<Registration> Registry::lookup(bp3::TypeInfo const & t) const {
-    RegistryMap & map = getMap(this);
-    RegistryMap::const_iterator iter = map.find(t);
+    Registration::Map & map = getMap(this);
+    Registration::Map::const_iterator iter = map.find(t);
     std::shared_ptr<Registration> result;
     if (iter != map.end()) result = iter->second;
     return result;
+}
+
+void Registry::import(Registry const & other) const {
+    Registration::Map & this_map = getMap(this);
+    Registration::Map & other_map = getMap(&other);
+    for (auto other_item : other_map) {
+        // We don't want to just transfer the shared_ptr; each module should have its
+        // own registration for a particular type, so registering new converters for
+        // that type doesn't affect the imported modules.
+        std::shared_ptr<Registration> & this_reg = this_map[other_item.first];
+        if (!this_reg) {
+            this_reg = std::make_shared<Registration>();
+        }
+        std::shared_ptr<Registration> other_reg = other_item.second;
+        this_reg->from_python.insert(
+            this_reg->from_python.begin(),
+            other_reg->from_python.begin(),
+            other_reg->from_python.end()
+        );
+        for (auto other_derived : other_reg->derived) {
+            // Instead of transferring the derived-class registrations directly from other_map, we lookup
+            // the corresponding registrations in this_map, and ensure those are in this_reg->derived.
+            this_reg->derived[other_derived.first] = this_map[other_derived.first];
+        }
+    }
 }
 
 void Registry::registerFromPython(

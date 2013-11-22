@@ -6,17 +6,29 @@
 #include "bp3/FromPythonFuncs.hpp"
 
 #include <list>
+#include <map>
+#include <cstring>
 
 namespace bp3 {
 
 class Registration {
+
+    struct CompareTypeInfo {
+        bool operator()(TypeInfo const & a, TypeInfo const & b) const {
+            return std::strcmp(a.name(), b.name()) < 0;
+        }
+    };
+
 public:
 
     Registration() {}
 
-    std::list<FromPythonFuncs> from_python;
+    typedef std::list<FromPythonFuncs> FromPythonList;
+    typedef std::map<TypeInfo,std::shared_ptr<Registration>,CompareTypeInfo> Map;
 
-    std::list<std::shared_ptr<Registration>> derived;
+    FromPythonList from_python;
+
+    Map derived;
 
 };
 

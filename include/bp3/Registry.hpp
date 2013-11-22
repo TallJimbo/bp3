@@ -11,13 +11,16 @@
 namespace bp3 {
 
 class Registration;
+class Module;
 
 class Registry {
 public:
 
-    Registry();
+    explicit Registry(Module const & module, bool install_if_missing=false);
 
     std::shared_ptr<Registration> lookup(TypeInfo const & t) const;
+
+    void import(Registry const & other) const;
 
     void registerFromPython(
         TypeInfo const & t, bool is_lvalue,

@@ -58,7 +58,7 @@ std::tuple<int,FromPythonFuncs*,ConverterData> findFromPythonConverter(
         // unless it's a complete failure.
         FromPythonFuncs * current_funcs = nullptr;
         std::tie(current_penalty,current_funcs,current_data) = findFromPythonConverter(
-            *iter, py, is_lvalue, inheritance_offset + 1
+            iter->second, py, is_lvalue, inheritance_offset + 1
         );
         if (current_penalty < 0) continue;
         if (have_derived_match && best_penalty <= current_penalty) {

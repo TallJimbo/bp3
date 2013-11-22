@@ -1,6 +1,7 @@
 #include "bp3/Module.hpp"
 #include "bp3/Callable.hpp"
 #include "bp3/Registry.hpp"
+#include "bp3/builtin/numbers.hpp"
 
 #include <iostream>
 #include <string>
@@ -138,7 +139,7 @@ init_bp3() {
     if (!m) return;
     try {
         bp3::LibraryAccess::initRegistryType(m);
-        bp3::Module mod("_bp3", bp3::PyPtr::borrow(m));
+        bp3::Module mod(bp3::PyPtr::borrow(m));
         bp3::LibraryAccess::initOtherTypes(mod);
     } catch (bp3::builtin::BaseException & err) {
         err.release();
@@ -160,7 +161,7 @@ PyInit__bp3() {
     if (!m) return m;
     try {
         bp3::LibraryAccess::initRegistryType(m);
-        bp3::Module mod("_bp3", bp3::PyPtr::borrow(m));
+        bp3::Module mod(bp3::PyPtr::borrow(m));
         bp3::LibraryAccess::initOtherTypes(mod);
     } catch (bp3::builtin::BaseException & err) {
         err.release();
