@@ -18,34 +18,32 @@ std::tuple<int,FromPythonFuncs*,ConverterData> findFromPythonConverter(
     ConverterData best_data;
     ConverterData current_data;
     assert(reg);
-    for (auto converter_list : reg->from_python) {
-        for (FromPythonFuncs & current_funcs : *converter_list) {
-            if (is_lvalue && !current_funcs.is_lvalue) {
-                continue;
-            }
-            try {
-                current_penalty = current_funcs.check(py, current_data);
-            } catch (...) {
-                current_penalty = -1;
-            }
-            if (current_penalty < 0) {
-                continue;
-            }
-            // When we have ties between imperfect matches, we choose the first one encountered.
-            if (best_funcs && best_penalty <= current_penalty) {
-                if (current_funcs.cleanup) current_funcs.cleanup(current_data);
-            } else {
-                if (best_funcs && best_funcs->cleanup) best_funcs->cleanup(best_data);
-                best_funcs = &current_funcs;
-                best_data = current_data;
-                best_penalty = current_penalty;
-                if (best_penalty == 0) {
-                    // perfect match, so we short-circuit and return.
-                    return std::make_tuple(best_penalty + inheritance_offset, best_funcs, best_data);
-                }
-            }
-            // By now either current_data is the same as best_data, or it's been cleaned up.
+    for (FromPythonFuncs & current_funcs :  reg->from_python) {
+        if (is_lvalue && !current_funcs.is_lvalue) {
+            continue;
         }
+        try {
+            current_penalty = current_funcs.check(py, current_data);
+        } catch (...) {
+            current_penalty = -1;
+        }
+        if (current_penalty < 0) {
+            continue;
+        }
+        // When we have ties between imperfect matches, we choose the first one encountered.
+        if (best_funcs && best_penalty <= current_penalty) {
+            if (current_funcs.cleanup) current_funcs.cleanup(current_data);
+        } else {
+            if (best_funcs && best_funcs->cleanup) best_funcs->cleanup(best_data);
+            best_funcs = &current_funcs;
+            best_data = current_data;
+            best_penalty = current_penalty;
+            if (best_penalty == 0) {
+                // perfect match, so we short-circuit and return.
+                return std::make_tuple(best_penalty + inheritance_offset, best_funcs, best_data);
+            }
+        }
+        // By now either current_data is the same as best_data, or it's been cleaned up.
     }
     if (best_penalty < 0) {
         // All checks failed (which also means there's nothing to clean up).

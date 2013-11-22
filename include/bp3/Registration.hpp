@@ -12,9 +12,9 @@ namespace bp3 {
 class Registration {
 public:
 
-    Registration();
+    Registration() {}
 
-    std::list<std::shared_ptr<std::list<FromPythonFuncs>>> from_python;
+    std::list<FromPythonFuncs> from_python;
 
     std::list<std::shared_ptr<Registration>> derived;
 

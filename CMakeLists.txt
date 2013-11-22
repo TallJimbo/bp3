@@ -56,7 +56,6 @@ add_library(bp3 ${LIBRARY_TYPE}
   src/builtin/str.cpp
   src/builtin/sequence.cpp
   src/FromPythonBase.cpp
-  src/Registration.cpp
   src/Registry.cpp
   src/TypeInfo.cpp
 )

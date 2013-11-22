@@ -103,7 +103,7 @@ void Registry::registerFromPython(
     if (!reg) {
         reg = std::make_shared<Registration>();
     }
-    reg->from_python.front()->push_front(
+    reg->from_python.push_front(
         FromPythonFuncs{is_lvalue, check, convert, postcall, cleanup}
     );
 }
