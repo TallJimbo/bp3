@@ -18,7 +18,11 @@ public:
 
     FromPythonBase(FromPythonBase const &) = delete;
 
+    FromPythonBase(FromPythonBase &&) = delete;
+
     FromPythonBase & operator=(FromPythonBase const &) = delete;
+
+    FromPythonBase & operator=(FromPythonBase &&) = delete;
 
     bool isConvertible() const { return _penalty >= 0; }
 

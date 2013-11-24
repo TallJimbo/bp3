@@ -9,6 +9,8 @@ class ConverterData {
 public:
     void * scratch1;
     void * scratch2;
+
+    ConverterData() : scratch1(nullptr), scratch2(nullptr) {}
 };
 
 /*
