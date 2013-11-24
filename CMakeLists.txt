@@ -46,6 +46,7 @@ add_library(bp3 ${LIBRARY_TYPE}
   include/bp3/builtin.hpp
   include/bp3/PyPtr.hpp
   include/bp3/Module.hpp
+  include/bp3/Debug.hpp
   # source files
   src/Overload.cpp
   src/Callable.cpp
@@ -56,6 +57,7 @@ add_library(bp3 ${LIBRARY_TYPE}
   src/builtin/str.cpp
   src/builtin/sequence.cpp
   src/FromPythonBase.cpp
+  src/Debug.cpp
   src/Registry.cpp
   src/TypeInfo.cpp
 )

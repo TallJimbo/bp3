@@ -1,6 +1,8 @@
 #include "bp3/Module.hpp"
 #include "bp3/FromPythonBase.hpp"
 #include "bp3/Registration.hpp"
+#include "bp3/Debug.hpp"
+#include "bp3/builtin/str.hpp"
 
 namespace bp3 {
 
@@ -12,6 +14,7 @@ std::tuple<int,FromPythonFuncs*,ConverterData> findFromPythonConverter(
     bool is_lvalue,
     int inheritance_offset
 ) {
+    Log<10>::get() << "findFromPythonConverter: starting search for Python object '" << py << "'\n";
     int best_penalty = -1;
     int current_penalty = -1;
     FromPythonFuncs * best_funcs = nullptr;
@@ -19,26 +22,46 @@ std::tuple<int,FromPythonFuncs*,ConverterData> findFromPythonConverter(
     ConverterData current_data;
     assert(reg);
     for (FromPythonFuncs & current_funcs :  reg->from_python) {
+        Log<10>::get() << "findFromPythonConverter: testing converter at " << &current_funcs << "\n";
         if (is_lvalue && !current_funcs.is_lvalue) {
+            Log<10>::get() << "findFromPythonConverter: converter at "
+                           << &current_funcs << " is not an lvalue\n";
             continue;
         }
         try {
             current_penalty = current_funcs.check(py, current_data);
         } catch (...) {
+            Log<10>::get() << "findFromPythonConverter: converter at "
+                           << &current_funcs << " check() threw an exception\n";
             current_penalty = -1;
         }
         if (current_penalty < 0) {
+            Log<10>::get() << "findFromPythonConverter: converter at "
+                           << &current_funcs << " check() failed\n";
             continue;
         }
         // When we have ties between imperfect matches, we choose the first one encountered.
         if (best_funcs && best_penalty <= current_penalty) {
-            if (current_funcs.cleanup) current_funcs.cleanup(current_data);
+            Log<10>::get() << "findFromPythonConverter: converter at " << &current_funcs
+                           << " with penalty=" << current_penalty << ";"
+                           << " is not better than " << best_funcs
+                           << " with penalty=" << best_penalty << "\n";
+            if (current_funcs.cleanup) {
+                current_funcs.cleanup(current_data);
+                current_data = ConverterData();
+            }
         } else {
+            Log<10>::get() << "findFromPythonConverter: converter at " << &current_funcs
+                           << " with penalty=" << current_penalty << ";"
+                           << " is better than " << best_funcs
+                           << " with penalty=" << best_penalty << "\n";
             if (best_funcs && best_funcs->cleanup) best_funcs->cleanup(best_data);
             best_funcs = &current_funcs;
             best_data = current_data;
             best_penalty = current_penalty;
             if (best_penalty == 0) {
+                Log<10>::get() << "findFromPythonConverter: converter at " << &current_funcs
+                               << " is a perfect match\n";
                 // perfect match, so we short-circuit and return.
                 return std::make_tuple(best_penalty + inheritance_offset, best_funcs, best_data);
             }
@@ -63,7 +86,10 @@ std::tuple<int,FromPythonFuncs*,ConverterData> findFromPythonConverter(
         if (current_penalty < 0) continue;
         if (have_derived_match && best_penalty <= current_penalty) {
             // The new match isn't any better than the old one, and it came from a derived-class sibling.
-            if (current_funcs->cleanup) current_funcs->cleanup(current_data);
+            if (current_funcs->cleanup) {
+                current_funcs->cleanup(current_data);
+                current_data = ConverterData(); // reset pointers to null;
+            }
         } else {
             if (best_funcs && best_funcs->cleanup) best_funcs->cleanup(best_data);
             best_funcs = current_funcs;
@@ -88,7 +114,7 @@ FromPythonBase::FromPythonBase(
     PyPtr const & py,
     bp3::TypeInfo const & ti,
     bool is_lvalue
-) : _py(py), _penalty(-1), _data(), _funcs(nullptr)
+) : Citizen<10>("FromPythonBase"), _py(py), _penalty(-1), _data(), _funcs(nullptr)
 {
     std::shared_ptr<Registration> reg = registry.lookup(ti);
     if (reg) {

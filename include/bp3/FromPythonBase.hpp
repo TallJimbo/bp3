@@ -4,12 +4,13 @@
 #include "bp3/PyPtr.hpp"
 #include "bp3/TypeInfo.hpp"
 #include "bp3/FromPythonFuncs.hpp"
+#include "bp3/Debug.hpp"
 
 namespace bp3 {
 
 class Registry;
 
-class FromPythonBase {
+class FromPythonBase : public Citizen<10> {
 public:
 
     explicit FromPythonBase(
