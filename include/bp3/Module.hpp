@@ -37,6 +37,7 @@
     };                                                                  \
     PyMODINIT_FUNC                                                      \
     PyInit_ ## name() {                                                 \
+        PyObject * m = nullptr;                                         \
         try {                                                           \
             bp3::Module bp3_module("bp3");                              \
             PyObject * m = PyModule_Create(&_bp3_ ## name ## _module_def); \
