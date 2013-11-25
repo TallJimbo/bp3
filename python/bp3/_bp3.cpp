@@ -93,12 +93,10 @@ struct IntConverters {
     static void * convert(PyPtr const & py, ConverterData & data) {
         Log<15>::get() << "IntConverters::convert: data at " << &data << "\n";
         PyObject * p = (data.scratch1) ? (PyObject*)data.scratch1 : py.get();
-        if (data.scratch1) {
-            if (std::is_signed<T>::value) {
-                data.scratch2 = new T(PyLong_AsLongLong(p));
-            } else {
-                data.scratch2 = new T(PyLong_AsUnsignedLongLong(p));
-            }
+        if (std::is_signed<T>::value) {
+            data.scratch2 = new T(PyLong_AsLongLong(p));
+        } else {
+            data.scratch2 = new T(PyLong_AsUnsignedLongLong(p));
         }
         return data.scratch2;
     }
