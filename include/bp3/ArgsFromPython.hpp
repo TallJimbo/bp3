@@ -122,12 +122,29 @@ template <std::size_t N, typename A>
 struct NthArg;
 
 template <std::size_t N, typename T, typename ...E>
-struct NthArg<N, ArgsFromPython<T,E...>> : public NthArg<N-1, ArgsFromPython<E...>> {};
+struct NthArg<N, ArgsFromPython<T,E...>> : public NthArg<N-1, ArgsFromPython<E...>> {
+};
 
 template <typename T, typename ...E>
 struct NthArg<0, ArgsFromPython<T,E...>> {
     typedef T Type;
+    typedef ArgsFromPythonImpl<0,T,E...> Impl;
 };
+
+template <std::size_t N, typename ...E>
+ArgsFromPythonImpl<N,...E> getImpl(ArgsFromPython<
+
+template <std::size_t N, typename ...E>
+typename NthArg<N,ArgsFromPython<E...>>::Type get(ArgsFromPythonImpl<E...> & x) {
+    static_cast<ArgsFromPythonImpl<N,
+    return NthArg<N,ArgsFromPython<E...>>::get(x);
+}
+
+template<int ...> struct seq {};
+
+template<int N, int ...S> struct gens : gens<N-1, N-1, S...> {};
+
+template<int ...S> struct gens<0, S...>{ typedef seq<S...> type; };
 
 } // namespace bp3
 

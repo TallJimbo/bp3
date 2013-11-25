@@ -26,9 +26,7 @@ public:
 
     virtual void convertArgs(Registry const & registry, OverloadResolutionData & data) const = 0;
 
-#if 0
     virtual void call(OverloadResolutionData & data) const = 0;
-#endif
 
     virtual ~OverloadBase() {}
 
@@ -53,12 +51,22 @@ struct OverloadResolutionData {
 
 template <typename Result, typename ...Args>
 class Overload : public OverloadBase {
+    template <int ...S>
+    void _call(OverloadResolutionData & data, seq<S...>) const {
+        ArgsFromPython<Args...> & converted_args
+            = static_cast<ArgsFromPython<Args...> &>(*data.converted_args);
+        _func(get<S>(converted_args)...); // TODO: collect return value
+    }
 public:
 
     virtual void convertArgs(Registry const & registry, OverloadResolutionData & data) const {
         data.converted_args.reset(
             new ArgsFromPython<Args...>(registry, data.unpacked_args)
         );
+    }
+
+    virtual void call(OverloadResolutionData & data) const {
+        _call(data, typename gens<sizeof...(Args)>::type());
     }
 
     Overload(std::function<Result(Args...)> func, std::vector<std::string> kwd_names) :

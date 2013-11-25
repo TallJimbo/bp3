@@ -45,7 +45,7 @@ private:
                 data.converted_args->reportConversionFailure(msg, "\n  ");
                 builtin::TypeError::raise(msg.str());
             }
-            // TODO: actually calling the C++ func.
+            data.overload->call(data);
         } else {
             typedef std::list<OverloadResolutionData> DataList;
             DataList data(impl->_overloads.begin(), impl->_overloads.end());
@@ -84,7 +84,7 @@ private:
                 // TODO: diagnostics for ambiguous calls
                 builtin::TypeError::raise("Ambiguous call to overloaded function '" + impl->_name + "'");
             }
-            // TODO: actually calling the C++ func;
+            data.front().overload->call(data.front());
         }
         Py_RETURN_NONE;
     } catch (builtin::Exception & err) {
