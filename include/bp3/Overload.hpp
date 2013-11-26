@@ -51,11 +51,12 @@ struct OverloadResolutionData {
 
 template <typename Result, typename ...Args>
 class Overload : public OverloadBase {
+
     template <int ...S>
-    void _call(OverloadResolutionData & data, seq<S...>) const {
+    void _call(OverloadResolutionData & data, IntSeq<S...>) const {
         ArgsFromPython<Args...> & converted_args
             = static_cast<ArgsFromPython<Args...> &>(*data.converted_args);
-        _func(get<S>(converted_args)...); // TODO: collect return value
+        _func(std::get<S>(converted_args.elements)->convert()...); // TODO: collect return value
     }
 public:
 
@@ -66,7 +67,7 @@ public:
     }
 
     virtual void call(OverloadResolutionData & data) const {
-        _call(data, typename gens<sizeof...(Args)>::type());
+        _call(data, typename IntSeqGen<sizeof...(Args)>::Type());
     }
 
     Overload(std::function<Result(Args...)> func, std::vector<std::string> kwd_names) :

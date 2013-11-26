@@ -5,10 +5,53 @@
 #include "bp3/builtin/str.hpp"
 
 #include <vector>
+#include <tuple>
 #include <iostream>
 #include <algorithm>
 
 namespace bp3 {
+
+// TODO: move these metaprogramming utilities to a separate header
+
+template <int ...S> struct IntSeq {};
+
+template <int N, int ...S> struct IntSeqGen : IntSeqGen<N-1, N-1, S...> {};
+
+template <int ...S> struct IntSeqGen<0, S...>{ typedef IntSeq<S...> Type; };
+
+template <typename Func, typename ...E1>
+struct ForEachHelper {
+
+    void apply() {
+        _apply1<0,E1...>();
+    }
+
+    ForEachHelper(Func & f, std::tuple<E1...> const & t) : _f(f), _t(t) {}
+
+private:
+
+    template <int>
+    void _apply1() {}
+
+    template <int, typename T, typename ...E2>
+    void _apply1() {
+        _apply1<0,E2...>();
+        _apply2<sizeof...(E2)>();
+    }
+
+    template <std::size_t N>
+    void _apply2() {
+        _f(std::get<N>(_t));
+    }
+
+    Func & _f;
+    std::tuple<E1...> const & _t;
+};
+
+template <typename Func, typename ...E>
+void forEach(Func & f, std::tuple<E...> const & t) {
+    ForEachHelper<Func,E...>(f, t).apply();
+}
 
 struct OverloadScore {
 
@@ -51,7 +94,32 @@ private:
     std::vector<int> _penalties;
 };
 
-struct ArgsFromPythonBase {
+class ArgsFromPythonBase {
+protected:
+
+    struct ReportConversionFailure {
+
+        template <typename T>
+        void operator()(std::shared_ptr< FromPython<T> > const & element) {
+            if (!element->isConvertible()) {
+                os << delimiter
+                   << "cannot convert '"
+                   << std::string(builtin::repr(builtin::object(element->getPyObject())))
+                   << "' passed as argument " << ++n << " to C++ type '"
+                   << makeTypeInfo<T>().demangle() << "'";
+            }
+        }
+
+        ReportConversionFailure(std::ostream & os_, std::string const & delimiter_) :
+            n(0), os(os_), delimiter(delimiter_)
+        {}
+
+        int n;
+        std::ostream & os;
+        std::string const & delimiter;
+    };
+
+public:
 
     ArgsFromPythonBase(std::size_t n) : score(n) {}
 
@@ -67,84 +135,53 @@ struct ArgsFromPythonBase {
 };
 
 template <std::size_t N, typename ...E>
-struct ArgsFromPythonImpl;
+struct ArgsFromPythonHelper;
 
 template <std::size_t N>
-struct ArgsFromPythonImpl<N> : public ArgsFromPythonBase {
+struct ArgsFromPythonHelper<N> {
 
-    explicit ArgsFromPythonImpl(Registry const & registryx, std::vector<PyPtr> const & unpacked_args) :
-        ArgsFromPythonBase(N)
-    {}
+    static std::tuple<>
+    apply(OverloadScore & score, Registry const & registry, std::vector<PyPtr> const & unpacked_args) {}
 
-    void _reportConversionFailure(std::ostream & os, std::string const & delimiter) const {}
 };
 
 template <std::size_t N, typename T, typename ...E>
-struct ArgsFromPythonImpl<N,T,E...> : public ArgsFromPythonImpl<N+1,E...> {
+struct ArgsFromPythonHelper<N,T,E...> {
 
-    typedef ArgsFromPythonImpl<N+1,E...> BaseT;
-
-    explicit ArgsFromPythonImpl(Registry const & registry, std::vector<PyPtr> const & unpacked_args) :
-        BaseT(registry, unpacked_args), _elem(registry, unpacked_args[N])
-    {
-        this->score.set(N, _elem.getPenalty());
+    // TODO: we probably don't need shared_ptrs here, as we should be able to use move semantics
+    // instead.  But as of g++ 4.6 that doesn't seem to be working - we should try again with a future
+    // version.
+    static std::tuple<std::shared_ptr<FromPython<T>>,std::shared_ptr<FromPython<E>>...>
+    apply(OverloadScore & score, Registry const & registry, std::vector<PyPtr> const & unpacked_args) {
+        std::shared_ptr<FromPython<T>> element = std::make_shared<FromPython<T>>(registry, unpacked_args[N]);
+        score.set(N, element->getPenalty());
+        std::tuple<std::shared_ptr<FromPython<T>>,std::shared_ptr<FromPython<E>>...> r
+            = std::tuple_cat(
+                std::make_tuple(element),
+                ArgsFromPythonHelper<N+1,E...>::apply(score, registry, unpacked_args)
+            );
+        return r;
     }
 
-    void _reportConversionFailure(std::ostream & os, std::string const & delimiter) const {
-        if (!_elem.isConvertible()) {
-            os << delimiter
-               << "cannot convert '" << std::string(builtin::repr(builtin::object(_elem.getPyObject())))
-               << "' passed as argument " << N << " to C++ type '"
-               << makeTypeInfo<T>().demangle() << "'";
-        }
-        BaseT::_reportConversionFailure(os, delimiter);
-    }
-
-    FromPython<T> _elem;
 };
 
 template <typename ...E>
-class ArgsFromPython : public ArgsFromPythonImpl<0,E...> {
-    typedef ArgsFromPythonImpl<0,E...> BaseT;
+class ArgsFromPython : public ArgsFromPythonBase {
+    typedef std::tuple<std::shared_ptr<FromPython<E>>...> Tuple;
 public:
 
     ArgsFromPython(Registry const & registry, std::vector<PyPtr> const & unpacked_args) :
-        BaseT(registry, unpacked_args)
+        ArgsFromPythonBase(sizeof...(E)),
+        elements(ArgsFromPythonHelper<0,E...>::apply(this->score, registry, unpacked_args))
     {}
 
     virtual void reportConversionFailure(std::ostream & os, std::string const & delimiter) const {
-        BaseT::_reportConversionFailure(os, delimiter);
+        ArgsFromPythonBase::ReportConversionFailure f(os, delimiter);
+        forEach(f, elements);
     }
 
+    Tuple elements;
 };
-
-template <std::size_t N, typename A>
-struct NthArg;
-
-template <std::size_t N, typename T, typename ...E>
-struct NthArg<N, ArgsFromPython<T,E...>> : public NthArg<N-1, ArgsFromPython<E...>> {
-};
-
-template <typename T, typename ...E>
-struct NthArg<0, ArgsFromPython<T,E...>> {
-    typedef T Type;
-    typedef ArgsFromPythonImpl<0,T,E...> Impl;
-};
-
-template <std::size_t N, typename ...E>
-ArgsFromPythonImpl<N,...E> getImpl(ArgsFromPython<
-
-template <std::size_t N, typename ...E>
-typename NthArg<N,ArgsFromPython<E...>>::Type get(ArgsFromPythonImpl<E...> & x) {
-    static_cast<ArgsFromPythonImpl<N,
-    return NthArg<N,ArgsFromPython<E...>>::get(x);
-}
-
-template<int ...> struct seq {};
-
-template<int N, int ...S> struct gens : gens<N-1, N-1, S...> {};
-
-template<int ...S> struct gens<0, S...>{ typedef seq<S...> type; };
 
 } // namespace bp3
 
