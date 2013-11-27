@@ -29,6 +29,8 @@ add_custom_command(
 add_library(bp3 ${LIBRARY_TYPE}
   # header files
   include/bp3/utils/Any.hpp
+  include/bp3/library.hpp
+  include/bp3/meta.hpp
   include/bp3/Overload.hpp
   include/bp3/Callable.hpp
   include/bp3/ArgsFromPython.hpp
