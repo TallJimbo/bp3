@@ -88,15 +88,11 @@ static PyMethodDef methods[] = {
 };
 
 void wrap(bp3::Module & mod_) {
-    std::cerr << "checkpoint1\n";
     mod.reset(new bp3::Module(mod_));
-    std::cerr << "checkpoint2\n";
     mod_.getRegistry().registerFromPython(
         bp3::makeTypeInfo<Example1>(), true, &Example1::check1, &Example1::convert1
     );
-    std::cerr << "checkpoint3\n";
     mod_.add("py1", Example1::make("ex1"));
-    std::cerr << "checkpoint4\n";
 }
 
 BP3_MODULE(from_python_mod, wrap, methods)
