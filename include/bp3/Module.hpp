@@ -40,7 +40,7 @@
         PyObject * m = nullptr;                                         \
         try {                                                           \
             bp3::Module bp3_module("bp3");                              \
-            PyObject * m = PyModule_Create(&_bp3_ ## name ## _module_def); \
+            m = PyModule_Create(&_bp3_ ## name ## _module_def);         \
             if (!m) return m;                                           \
             bp3::Module module(bp3::PyPtr::borrow(m));                  \
             module.getRegistry().import(bp3_module.getRegistry());      \
