@@ -4,6 +4,7 @@
 #include "bp3/PyPtr.hpp"
 #include "bp3/TypeInfo.hpp"
 #include "bp3/FromPythonFuncs.hpp"
+#include "bp3/ToPython.hpp"
 
 #include <list>
 #include <map>
@@ -21,10 +22,16 @@ class Registration {
 
 public:
 
-    Registration() {}
+    Registration() : move_to_python(nullptr), ref_to_python(nullptr), cref_to_python(nullptr) {}
 
     typedef std::list<FromPythonFuncs> FromPythonList;
     typedef std::map<TypeInfo,std::shared_ptr<Registration>,CompareTypeInfo> Map;
+
+    MoveToPythonFunc move_to_python;
+
+    RefToPythonFunc ref_to_python;
+
+    CRefToPythonFunc cref_to_python;
 
     FromPythonList from_python;
 

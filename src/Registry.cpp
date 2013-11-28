@@ -110,6 +110,15 @@ void Registry::import(Registry const & other) const {
             this_reg = std::make_shared<Registration>();
         }
         std::shared_ptr<Registration> other_reg = other_item.second;
+        if (other_reg->move_to_python) {
+            this_reg->move_to_python = other_reg->move_to_python;
+        }
+        if (other_reg->ref_to_python) {
+            this_reg->ref_to_python = other_reg->ref_to_python;
+        }
+        if (other_reg->cref_to_python) {
+            this_reg->cref_to_python = other_reg->cref_to_python;
+        }
         this_reg->from_python.insert(
             this_reg->from_python.begin(),
             other_reg->from_python.begin(),
@@ -118,9 +127,44 @@ void Registry::import(Registry const & other) const {
         for (auto other_derived : other_reg->derived) {
             // Instead of transferring the derived-class registrations directly from other_map, we lookup
             // the corresponding registrations in this_map, and ensure those are in this_reg->derived.
+            // This may create those registrations in this_map if they don't exist as a side effect, but
+            // that's ok because we know we'll fill them later in the outer loop.
             this_reg->derived[other_derived.first] = this_map[other_derived.first];
         }
     }
+}
+
+void Registry::registerMoveToPython(
+    TypeInfo const & t,
+    MoveToPythonFunc func
+) const {
+    std::shared_ptr<Registration> & reg = getMap(this)[t];
+    if (!reg) {
+        reg = std::make_shared<Registration>();
+    }
+    reg->move_to_python = func;
+}
+
+void Registry::registerRefToPython(
+    TypeInfo const & t,
+    RefToPythonFunc func
+) const {
+    std::shared_ptr<Registration> & reg = getMap(this)[t];
+    if (!reg) {
+        reg = std::make_shared<Registration>();
+    }
+    reg->ref_to_python = func;
+}
+
+void Registry::registerCRefToPython(
+    TypeInfo const & t,
+    CRefToPythonFunc func
+) const {
+    std::shared_ptr<Registration> & reg = getMap(this)[t];
+    if (!reg) {
+        reg = std::make_shared<Registration>();
+    }
+    reg->cref_to_python = func;
 }
 
 void Registry::registerFromPython(

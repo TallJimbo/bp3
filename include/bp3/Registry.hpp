@@ -3,6 +3,7 @@
 
 #include "bp3/TypeInfo.hpp"
 #include "bp3/FromPythonBase.hpp"
+#include "bp3/ToPython.hpp"
 #include "bp3/builtin/exceptions.hpp"
 
 #include <string>
@@ -21,6 +22,21 @@ public:
     std::shared_ptr<Registration> lookup(TypeInfo const & t) const;
 
     void import(Registry const & other) const;
+
+    void registerMoveToPython(
+        TypeInfo const & t,
+        MoveToPythonFunc func
+    ) const;
+
+    void registerRefToPython(
+        TypeInfo const & t,
+        RefToPythonFunc func
+    ) const;
+
+    void registerCRefToPython(
+        TypeInfo const & t,
+        CRefToPythonFunc func
+    ) const;
 
     void registerFromPython(
         TypeInfo const & t, bool is_lvalue,
