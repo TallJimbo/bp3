@@ -48,8 +48,13 @@ struct FloatConverters {
         delete reinterpret_cast<T*>(data.scratch2);
     }
 
+    static PyPtr toPython(T * value) {
+        return PyPtr::steal(PyFloat_FromDouble(*value));
+    }
+
     static void declare(Registry const & registry) {
         registry.registerFromPython(makeTypeInfo<T>(), false, check, convert, cleanup);
+        registry.registerMoveToPython(makeTypeInfo<T>(), (MoveToPythonFunc)toPython);
     }
 
 };
@@ -107,8 +112,26 @@ struct IntConverters {
         delete reinterpret_cast<T*>(data.scratch2);
     }
 
+    static PyPtr toPython(T * value) {
+#if PY_MAJOR_VERSION == 2
+        if (sizeof(T) <= sizeof(std::size_t)) {
+            if (std::is_signed<T>::value) {
+                return PyPtr::steal(PyInt_FromSsize_t(*value));
+            } else {
+                return PyPtr::steal(PyInt_FromSize_t(*value));
+            }
+        }
+#endif
+        if (std::is_signed<T>::value) {
+            return PyPtr::steal(PyLong_FromLongLong(*value));
+        } else {
+            return PyPtr::steal(PyLong_FromUnsignedLongLong(*value));
+        }
+    }
+
     static void declare(Registry const & registry) {
         registry.registerFromPython(makeTypeInfo<T>(), false, check, convert, cleanup);
+        registry.registerMoveToPython(makeTypeInfo<T>(), (MoveToPythonFunc)toPython);
     }
 
 };
