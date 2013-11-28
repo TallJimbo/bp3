@@ -1,5 +1,5 @@
-#ifndef BP3_from_python_funcs_hpp_INCLUDED
-#define BP3_from_python_funcs_hpp_INCLUDED
+#ifndef BP3_FromPythonFuncs_hpp_INCLUDED
+#define BP3_FromPythonFuncs_hpp_INCLUDED
 
 #include "bp3/PyPtr.hpp"
 
