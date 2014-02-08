@@ -62,21 +62,6 @@ struct ToPython {
         return ref(registry, value);
     }
 
-    template <typename T>
-    static PyPtr apply(Registry const & registry, T const & value) {
-        return cref(registry, value);
-    }
-
-    template <typename T>
-    static PyPtr apply(Registry const & registry, T * value) {
-        return ref(registry, value);
-    }
-
-    template <typename T>
-    static PyPtr apply(Registry const & registry, T const * value) {
-        return cref(registry, value);
-    }
-
 private:
 
     static PyPtr _move(TypeInfo const & ti, Registry const & registry, void * value);
@@ -84,6 +69,51 @@ private:
     static PyPtr _ref(TypeInfo const & ti, Registry const & registry, void * value);
 
     static PyPtr _cref(TypeInfo const & ti, Registry const & registry, void const * value);
+
+};
+
+template <typename T>
+struct ReturnToPython {
+
+    static PyPtr apply(Registry const & registry, T && value) {
+        return ToPython::move(registry, std::move(value));
+    }
+
+};
+
+template <typename T>
+struct ReturnToPython<T &> {
+
+    static PyPtr apply(Registry const & registry, T & value) {
+        return ToPython::ref(registry, value);
+    }
+
+};
+
+template <typename T>
+struct ReturnToPython<T const &> {
+
+    static PyPtr apply(Registry const & registry, T const & value) {
+        return ToPython::cref(registry, value);
+    }
+
+};
+
+template <typename T>
+struct ReturnToPython<T *> {
+
+    static PyPtr apply(Registry const & registry, T * value) {
+        return ToPython::ref(registry, value);
+    }
+
+};
+
+template <typename T>
+struct ReturnToPython<T const *> {
+
+    static PyPtr apply(Registry const & registry, T const * value) {
+        return ToPython::cref(registry, value);
+    }
 
 };
 

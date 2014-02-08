@@ -26,7 +26,7 @@ public:
 
     virtual void convertArgs(Registry const & registry, OverloadResolutionData & data) const = 0;
 
-    virtual void call(Registry const & registry, OverloadResolutionData & data) const = 0;
+    virtual PyPtr call(Registry const & registry, OverloadResolutionData & data) const = 0;
 
     virtual ~OverloadBase() {}
 
@@ -53,10 +53,13 @@ template <typename Result, typename ...Args>
 class Overload : public OverloadBase {
 
     template <int ...S>
-    void _call(Registry const & registry, OverloadResolutionData & data, IntSeq<S...>) const {
+    PyPtr _call(Registry const & registry, OverloadResolutionData & data, IntSeq<S...>) const {
         ArgsFromPython<Args...> & converted_args
             = static_cast<ArgsFromPython<Args...> &>(*data.converted_args);
-        _func(std::get<S>(converted_args.elements)->convert()...); // TODO: collect return value
+        return ReturnToPython<Result>::apply(
+            registry,
+            _func(std::get<S>(converted_args.elements)->convert()...)
+        );
     }
 public:
 
@@ -66,8 +69,8 @@ public:
         );
     }
 
-    virtual void call(Registry const & registry, OverloadResolutionData & data) const {
-        _call(registry, data, typename IntSeqGen<sizeof...(Args)>::Type());
+    virtual PyPtr call(Registry const & registry, OverloadResolutionData & data) const {
+        return _call(registry, data, typename IntSeqGen<sizeof...(Args)>::Type());
     }
 
     Overload(std::function<Result(Args...)> func, std::vector<std::string> kwd_names) :
@@ -76,6 +79,37 @@ public:
 
 private:
     std::function<Result(Args...)> _func;
+};
+
+template <typename ...Args>
+class Overload<void,Args...> : public OverloadBase {
+
+    template <int ...S>
+    PyPtr _call(Registry const & registry, OverloadResolutionData & data, IntSeq<S...>) const {
+        ArgsFromPython<Args...> & converted_args
+            = static_cast<ArgsFromPython<Args...> &>(*data.converted_args);
+        _func(std::get<S>(converted_args.elements)->convert()...);
+        return PyPtr::steal(Py_None);
+    }
+
+public:
+
+    virtual void convertArgs(Registry const & registry, OverloadResolutionData & data) const {
+        data.converted_args.reset(
+            new ArgsFromPython<Args...>(registry, data.unpacked_args)
+        );
+    }
+
+    virtual PyPtr call(Registry const & registry, OverloadResolutionData & data) const {
+        return _call(registry, data, typename IntSeqGen<sizeof...(Args)>::Type());
+    }
+
+    Overload(std::function<void(Args...)> func, std::vector<std::string> kwd_names) :
+        OverloadBase(sizeof...(Args), std::move(kwd_names)), _func(std::move(func))
+    {}
+
+private:
+    std::function<void(Args...)> _func;
 };
 
 template <typename Result, typename ...Args>

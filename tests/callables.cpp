@@ -12,9 +12,9 @@ static PyMethodDef methods[] = {
 
 void f1() {}
 
-void f2(int a) {}
+int f2(int a) { return a + 3; }
 
-void f3(int a, double b) {}
+double f3(int a, double b) { return b * a; }
 
 void wrap(bp3::Module & module) {
     bp3::Callable wf1(module.getRegistry(), "f1", f1, {});
