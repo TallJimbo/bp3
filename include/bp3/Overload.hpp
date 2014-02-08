@@ -26,7 +26,7 @@ public:
 
     virtual void convertArgs(Registry const & registry, OverloadResolutionData & data) const = 0;
 
-    virtual void call(OverloadResolutionData & data) const = 0;
+    virtual void call(Registry const & registry, OverloadResolutionData & data) const = 0;
 
     virtual ~OverloadBase() {}
 
@@ -53,7 +53,7 @@ template <typename Result, typename ...Args>
 class Overload : public OverloadBase {
 
     template <int ...S>
-    void _call(OverloadResolutionData & data, IntSeq<S...>) const {
+    void _call(Registry const & registry, OverloadResolutionData & data, IntSeq<S...>) const {
         ArgsFromPython<Args...> & converted_args
             = static_cast<ArgsFromPython<Args...> &>(*data.converted_args);
         _func(std::get<S>(converted_args.elements)->convert()...); // TODO: collect return value
@@ -66,8 +66,8 @@ public:
         );
     }
 
-    virtual void call(OverloadResolutionData & data) const {
-        _call(data, typename IntSeqGen<sizeof...(Args)>::Type());
+    virtual void call(Registry const & registry, OverloadResolutionData & data) const {
+        _call(registry, data, typename IntSeqGen<sizeof...(Args)>::Type());
     }
 
     Overload(std::function<Result(Args...)> func, std::vector<std::string> kwd_names) :
