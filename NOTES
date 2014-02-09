@@ -1,0 +1,15 @@
+From-Python conversion and To-Python conversion seems to be working, but test overage is extremely limited.  Tests will be easier to write once we can start to wrap types, though.
+
+Still need to add exceptions to throw when type conversion fails.  We should throw a subclass of the usual Python exceptions thrown in argument parsing (multiple inheritance from bp3 exception base), so users can catch that specifically if desired.  We can use a completely custom exception when we fail to convert C++ to Python.
+
+Plan for C++ parsing: use libclang, but add our own Python bindings generated using bp3 (will serve as a test case for bp3 features).
+
+Plan for docs: use Sphinx + libclang bindings to autogenerate from C++ reStructured text comments.
+
+Should have a way of distinguishing between headers needed to build against bp3 and headers needed only to build bp3
+
+exception_access should be CamelCase
+
+consider changing naming conventions for builtin wrappers
+
+make sure Module::import is a no-op if repeated
