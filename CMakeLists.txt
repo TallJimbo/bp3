@@ -38,6 +38,7 @@ add_library(bp3 ${LIBRARY_TYPE}
   include/bp3/builtin.hpp
   include/bp3/Callable.hpp
   include/bp3/Debug.hpp
+  include/bp3/ExceptionAccess.hpp
   include/bp3/FromPython.hpp
   include/bp3/FromPythonBase.hpp
   include/bp3/FromPythonFuncs.hpp
@@ -50,6 +51,7 @@ add_library(bp3 ${LIBRARY_TYPE}
   include/bp3/Registry.hpp
   include/bp3/ToPython.hpp
   include/bp3/TypeInfo.hpp
+  include/bp3/WrapperError.hpp
   # source files
   ${CMAKE_CURRENT_BINARY_DIR}/src/builtin/exceptions.cpp
   src/builtin/numbers.cpp
@@ -58,12 +60,14 @@ add_library(bp3 ${LIBRARY_TYPE}
   src/builtin/str.cpp
   src/Callable.cpp
   src/Debug.cpp
+  src/ExceptionAccess.cpp
   src/FromPythonBase.cpp
   src/Module.cpp
   src/Overload.cpp
   src/Registry.cpp
   src/ToPython.cpp
   src/TypeInfo.cpp
+  src/WrapperError.cpp
 )
 
 add_subdirectory(python/bp3)

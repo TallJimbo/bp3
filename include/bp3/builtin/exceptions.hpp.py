@@ -10,7 +10,7 @@ public:
     static type typeobject() {{ return type(PyPtr::borrow(PyExc_{cls})); }}
     static void raise(std::string const & what);
 protected:
-    friend class detail::exception_access;
+    friend class bp3::detail::ExceptionAccess;
     {cls}(PyPtr const & value, PyPtr const & traceback) : {base}(value, traceback) {{}}
 }};"""
 
@@ -26,13 +26,13 @@ namespace bp3 {{
 
 void throw_error_already_set();
 
-namespace builtin {{
-
 namespace detail {{
 
-class exception_access;
+class ExceptionAccess;
 
 }} // namespace detail
+
+namespace builtin {{
 
 class BaseException {{
 public:
@@ -51,7 +51,7 @@ public:
 
 protected:
 
-    friend class detail::exception_access;
+    friend class bp3::detail::ExceptionAccess;
 
     BaseException(PyPtr const & value, PyPtr const & traceback) : _value(value), _traceback(traceback) {{}}
 
