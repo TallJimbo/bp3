@@ -18,6 +18,7 @@ static PyMethodDef methods[] = {
 } // anonymous
 
 void initNumericTypes(Module & module);
+void initExceptions(Module & module);
 
 class LibraryAccess {
 public:
@@ -27,11 +28,11 @@ public:
             throw_error_already_set();
         }
     }
-
     static void initOtherTypes(Module & module) {
         module.add("Callable", bp3::Callable::initType());
         initNumericTypes(module);
         // TODO: add more default converters
+        initExceptions(module);
     }
 
 };

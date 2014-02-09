@@ -5,5 +5,6 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py DESTINATION ${CMAKE_CURRENT_BI
 python_add_module(_bp3
   _bp3.cpp
   numeric.cpp
+  exceptions.cpp
   )
 target_link_libraries(_bp3 bp3)

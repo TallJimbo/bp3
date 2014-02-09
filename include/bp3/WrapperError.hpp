@@ -16,7 +16,7 @@ public:
 
 protected:
 
-    friend class builtin::detail::exception_access;
+    friend class detail::ExceptionAccess;
 
     WrapperError(PyPtr const & value, PyPtr const & traceback) : builtin::Exception(value, traceback) {}
 

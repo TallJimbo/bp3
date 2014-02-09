@@ -86,7 +86,7 @@ private:
             }
             return data.front().overload->call(impl->_registry, data.front()).release();
         }
-    } catch (builtin::Exception & err) {
+    } catch (builtin::BaseException & err) {
         err.release();
         return nullptr;
     } catch (...) {
