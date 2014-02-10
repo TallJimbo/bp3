@@ -55,7 +55,7 @@ void OverloadBase::unpackArgs(
             if (!success) {
                 if (throw_on_failure) {
                     builtin::TypeError::raise(
-                        function_name + "got an unexpected keyword argument '" + key_str + "'"
+                        function_name + " got an unexpected keyword argument '" + key_str + "'"
                     );
                 } else {
                     return;

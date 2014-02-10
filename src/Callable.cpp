@@ -1,4 +1,6 @@
 #include "bp3/Callable.hpp"
+#include "bp3/WrapperError.hpp"
+#include "bp3/Debug.hpp"
 #include <sstream>
 #include <list>
 
@@ -68,21 +70,26 @@ private:
                 builtin::TypeError::raise("No matching signatures for call to overloaded function '"
                                           + impl->_name + "'");
             }
-            DataList::iterator best = data.begin();
-            i = data.begin(); ++i;
-            while (i != data.end()) {
-                int cmp = best->converted_args->score.compare(i->converted_args->score);
-                if (cmp > 0) {
-                    data.erase(best);
-                    best = i;
-                    ++i;
-                } else if (cmp < 0) {
-                    i = data.erase(i);
+            for (DataList::iterator i = data.begin(); i != data.end(); ) {
+                // given the current overload i, see if it is strictly better than the current winner(s) j
+                bool is_i_best = true;
+                for (DataList::iterator j = data.begin(); j != i; ) {
+                    int cmp = j->converted_args->score.compare(i->converted_args->score);
+                    if (cmp > 0) { // i is strictly a better match than j: remove j from list
+                        j = data.erase(j);
+                    } else if (cmp < 0) { // j is strictly a better match than i: remove i; break inner loop
+                        i = data.erase(i);
+                        is_i_best = false;
+                        break;
+                    } else { // i and j are equally good: leave them both, test next j
+                        ++j;
+                    }
                 }
+                if (is_i_best) ++i;  // only increment i if we didn't erase it
             }
             if (data.size() != 1) {
                 // TODO: diagnostics for ambiguous calls
-                builtin::TypeError::raise("Ambiguous call to overloaded function '" + impl->_name + "'");
+                OverloadResolutionError::raise("Ambiguous call to overloaded function '" + impl->_name + "'");
             }
             return data.front().overload->call(impl->_registry, data.front()).release();
         }
