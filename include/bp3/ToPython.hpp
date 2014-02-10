@@ -52,16 +52,6 @@ struct ToPython {
         return _cref(makeTypeInfo<T>(), registry, value);
     }
 
-    template <typename T>
-    static PyPtr apply(Registry const & registry, T && value) {
-        return move(registry, value);
-    }
-
-    template <typename T>
-    static PyPtr apply(Registry const & registry, T & value) {
-        return ref(registry, value);
-    }
-
 private:
 
     static PyPtr _move(TypeInfo const & ti, Registry const & registry, void * value);
