@@ -35,6 +35,20 @@ tuple::tuple() : base(PyPtr::steal(PyTuple_New(0))) {}
 
 tuple::tuple(object const & other) : base(PyPtr::steal(PySequence_Tuple(other.ptr().get()))) {}
 
+tuple::tuple(std::initializer_list<PyPtr> x) : base(PyPtr::steal(PyTuple_New(x.size()))) {
+    std::size_t n = 0;
+    for (auto i = x.begin(); i != x.end(); ++i, ++n) {
+        PyTuple_SET_ITEM(_ptr.get(), n, i->incref());
+    }
+}
+
+tuple::tuple(std::initializer_list<object> x) : base(PyPtr::steal(PyTuple_New(x.size()))) {
+    std::size_t n = 0;
+    for (auto i = x.begin(); i != x.end(); ++i, ++n) {
+        PyTuple_SET_ITEM(_ptr.get(), n, i->ptr().incref());
+    }
+}
+
 object tuple::operator[](Py_ssize_t n) const {
     return object(PyPtr::borrow(PyTuple_GetItem(ptr().get(), n)));
 }
@@ -51,6 +65,20 @@ tuple tuple::operator*(Py_ssize_t n) const {
 list::list() : base(PyPtr::steal(PyList_New(0))) {}
 
 list::list(object const & other) : base(PyPtr::steal(PySequence_List(other.ptr().get()))) {}
+
+list::list(std::initializer_list<PyPtr> x) : base(PyPtr::steal(PyList_New(x.size()))) {
+    std::size_t n = 0;
+    for (auto i = x.begin(); i != x.end(); ++i, ++n) {
+        PyList_SET_ITEM(_ptr.get(), n, i->incref());
+    }
+}
+
+list::list(std::initializer_list<object> x) : base(PyPtr::steal(PyList_New(x.size()))) {
+    std::size_t n = 0;
+    for (auto i = x.begin(); i != x.end(); ++i, ++n) {
+        PyList_SET_ITEM(_ptr.get(), n, i->ptr().incref());
+    }
+}
 
 object list::operator[](Py_ssize_t n) const {
     return object(PyPtr::borrow(PyList_GetItem(ptr().get(), n)));

@@ -31,6 +31,10 @@ public:
 
     tuple(object const & other);
 
+    tuple(std::initializer_list<PyPtr> x);
+
+    tuple(std::initializer_list<object> x);
+
     object operator[](Py_ssize_t n) const;
 
     tuple operator+(tuple const & other) const;
@@ -48,6 +52,10 @@ public:
     list();
 
     list(object const & other);
+
+    list(std::initializer_list<PyPtr> x);
+
+    list(std::initializer_list<object> x);
 
     object operator[](Py_ssize_t n) const;
 
