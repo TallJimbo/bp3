@@ -22,6 +22,23 @@ protected:
 
 };
 
+class OverloadResolutionError : public WrapperError {
+public:
+
+    OverloadResolutionError(OverloadResolutionError const & other) : WrapperError(other) {}
+
+    static builtin::type typeobject();
+
+    static void raise(std::string const & what);
+
+protected:
+
+    friend class detail::ExceptionAccess;
+
+    OverloadResolutionError(PyPtr const & value, PyPtr const & traceback) : WrapperError(value, traceback) {}
+
+};
+
 } // namespace bp3
 
 #endif // !BP3_WrapperError_hpp_INCLUDED

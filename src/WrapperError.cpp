@@ -26,4 +26,16 @@ builtin::type WrapperError::typeobject() {
     return builtin::type(PyPtr::borrow(t));
 }
 
+void OverloadResolutionError::raise(std::string const & what) {
+    PyErr_SetString(typeobject().ptr().get(), what.c_str());
+    detail::ExceptionAccess::fetch_and_throw<OverloadResolutionError>();
+}
+
+builtin::type OverloadResolutionError::typeobject() {
+    static ::PyObject * t = getTypeFromModule("OverloadResolutionError");
+    // We don't want a destructor to run after Python has shut down, so we have an extra refcount here
+    // for the static raw pointer.
+    return builtin::type(PyPtr::borrow(t));
+}
+
 } // namespace bp3

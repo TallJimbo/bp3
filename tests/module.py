@@ -13,6 +13,8 @@ class ModuleTestCase(unittest.TestCase):
 
     def testExceptions(self):
         self.assertTrue(issubclass(bp3.WrapperError, Exception))
+        self.assertTrue(issubclass(bp3.OverloadResolutionError, bp3.WrapperError))
+        self.assertTrue(issubclass(bp3.OverloadResolutionError, TypeError))
 
 if __name__ == "__main__":
     unittest.main()
