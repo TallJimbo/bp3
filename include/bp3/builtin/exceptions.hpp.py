@@ -39,7 +39,7 @@ public:
 
     BaseException & operator=(BaseException const &) = delete;
 
-    PyPtr const & ptr() const {{ return _value.ptr(); }}
+    PyPtr ptr() const {{ return _value.ptr(); }}
 
     operator object const & () const {{ return _value; }}
 

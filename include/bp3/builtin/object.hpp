@@ -16,7 +16,7 @@ public:
 
     explicit object(PyPtr const & ptr) : _ptr(ptr.raise_if_null()) {}
 
-    PyPtr const & ptr() const { return _ptr; }
+    PyPtr ptr() const { return _ptr; }
 
 protected:
     PyPtr _ptr;
