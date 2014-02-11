@@ -14,6 +14,7 @@ namespace {
 
 } // anonymous
 
+
 void WrapperError::raise(std::string const & what) {
     PyErr_SetString(typeobject().ptr().get(), what.c_str());
     detail::ExceptionAccess::fetch_and_throw<WrapperError>();
@@ -26,6 +27,7 @@ builtin::type WrapperError::typeobject() {
     return builtin::type(PyPtr::borrow(t));
 }
 
+
 void OverloadResolutionError::raise(std::string const & what) {
     PyErr_SetString(typeobject().ptr().get(), what.c_str());
     detail::ExceptionAccess::fetch_and_throw<OverloadResolutionError>();
@@ -33,6 +35,45 @@ void OverloadResolutionError::raise(std::string const & what) {
 
 builtin::type OverloadResolutionError::typeobject() {
     static ::PyObject * t = getTypeFromModule("OverloadResolutionError");
+    // We don't want a destructor to run after Python has shut down, so we have an extra refcount here
+    // for the static raw pointer.
+    return builtin::type(PyPtr::borrow(t));
+}
+
+
+void FromPythonTypeError::raise(std::string const & what) {
+    PyErr_SetString(typeobject().ptr().get(), what.c_str());
+    detail::ExceptionAccess::fetch_and_throw<FromPythonTypeError>();
+}
+
+builtin::type FromPythonTypeError::typeobject() {
+    static ::PyObject * t = getTypeFromModule("FromPythonTypeError");
+    // We don't want a destructor to run after Python has shut down, so we have an extra refcount here
+    // for the static raw pointer.
+    return builtin::type(PyPtr::borrow(t));
+}
+
+
+void SignatureError::raise(std::string const & what) {
+    PyErr_SetString(typeobject().ptr().get(), what.c_str());
+    detail::ExceptionAccess::fetch_and_throw<SignatureError>();
+}
+
+builtin::type SignatureError::typeobject() {
+    static ::PyObject * t = getTypeFromModule("SignatureError");
+    // We don't want a destructor to run after Python has shut down, so we have an extra refcount here
+    // for the static raw pointer.
+    return builtin::type(PyPtr::borrow(t));
+}
+
+
+void UnknownError::raise(std::string const & what) {
+    PyErr_SetString(typeobject().ptr().get(), what.c_str());
+    detail::ExceptionAccess::fetch_and_throw<UnknownError>();
+}
+
+builtin::type UnknownError::typeobject() {
+    static ::PyObject * t = getTypeFromModule("UnknownError");
     // We don't want a destructor to run after Python has shut down, so we have an extra refcount here
     // for the static raw pointer.
     return builtin::type(PyPtr::borrow(t));

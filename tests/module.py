@@ -15,6 +15,9 @@ class ModuleTestCase(unittest.TestCase):
         self.assertTrue(issubclass(bp3.WrapperError, Exception))
         self.assertTrue(issubclass(bp3.OverloadResolutionError, bp3.WrapperError))
         self.assertTrue(issubclass(bp3.OverloadResolutionError, TypeError))
+        self.assertTrue(issubclass(bp3.FromPythonTypeError, bp3.WrapperError))
+        self.assertTrue(issubclass(bp3.FromPythonTypeError, TypeError))
+        self.assertTrue(issubclass(bp3.UnknownError, bp3.WrapperError))
 
 if __name__ == "__main__":
     unittest.main()

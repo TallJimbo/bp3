@@ -40,6 +40,21 @@ void initExceptions(Module & module) {
         "equally well.",
         builtin::tuple({base, builtin::TypeError::typeobject()}).ptr().release()
     );
+    makeException(
+        module, "bp3.FromPythonTypeError", "FromPythonTypeError",
+        "Exception raised when a Python object cannot be converted to the desired C++ type.",
+        builtin::tuple({base, builtin::TypeError::typeobject()}).ptr().release()
+    );
+    makeException(
+        module, "bp3.SignatureError", "SignatureError",
+        "Exception raised when a the Python arguments passed to a C++ function do not match its signature.",
+        builtin::tuple({base, builtin::TypeError::typeobject()}).ptr().release()
+    );
+    makeException(
+        module, "bp3.UnknownError", "UnknownError",
+        "Exception raised an when a C++ object that does not inherit from std::exception is thrown.",
+        builtin::tuple({base}).ptr().release()
+    );
 }
 
 } // namespace bp3

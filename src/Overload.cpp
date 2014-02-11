@@ -1,5 +1,6 @@
 #include "bp3/Overload.hpp"
 #include "bp3/builtin/str.hpp"
+#include "bp3/WrapperError.hpp"
 
 namespace bp3 {
 
@@ -17,7 +18,7 @@ void OverloadBase::unpackArgs(
     Py_ssize_t const len_pyargs = PyTuple_GET_SIZE(pyargs.get());
     if (static_cast<std::size_t>(len_pyargs) > data.unpacked_args.size()) {
         if (throw_on_failure) {
-            builtin::TypeError::raise(
+            SignatureError::raise(
                 function_name + " takes at most " + std::to_string(data.unpacked_args.size())
                 + " non-keyword arguments (" + std::to_string(len_pyargs) + " given)"
             );
@@ -39,7 +40,7 @@ void OverloadBase::unpackArgs(
                 if (key_str == _kwd_names[n]) {
                     if (data.unpacked_args[n]) {
                         if (throw_on_failure) {
-                            builtin::TypeError::raise(
+                            SignatureError::raise(
                                 function_name + " got multiple values for keyword argument '"
                                 + _kwd_names[n] + "'"
                             );
@@ -54,7 +55,7 @@ void OverloadBase::unpackArgs(
             }
             if (!success) {
                 if (throw_on_failure) {
-                    builtin::TypeError::raise(
+                    SignatureError::raise(
                         function_name + " got an unexpected keyword argument '" + key_str + "'"
                     );
                 } else {
@@ -66,7 +67,7 @@ void OverloadBase::unpackArgs(
     for (std::size_t n = 0; n < _kwd_names.size(); ++n) {
         if (!data.unpacked_args[n]) {
             if (throw_on_failure) {
-                builtin::TypeError::raise(
+                SignatureError::raise(
                     "Missing argument '" + _kwd_names[n] + "' in call to " + function_name
                 );
             } else {

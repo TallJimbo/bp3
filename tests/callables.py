@@ -18,6 +18,12 @@ class CallablesTestCase(unittest.TestCase):
         self.assertEqual(callables_mod.f3(6, b=7), 6.0*7)
         self.assertEqual(callables_mod.f3(a=8, b=9), 8.0*9)
 
+    def testSignatureError(self):
+        self.assertRaises(bp3.SignatureError, callables_mod.f1, 5)  # too many positional args
+        self.assertRaises(bp3.SignatureError, callables_mod.f3, 5)  # not enough positional args
+        self.assertRaises(bp3.SignatureError, callables_mod.f2, 2, a=4)  # arg both keyword and positional
+        self.assertRaises(bp3.SignatureError, callables_mod.f2, b=4)  # invalid keyword
+
     def testOverload(self):
         # these should be disambiguated just by the number of arguments
         self.assertEqual(callables_mod.f(), callables_mod.f1())
@@ -29,6 +35,9 @@ class CallablesTestCase(unittest.TestCase):
         # this should be ambiguous
         self.assertRaises(bp3.OverloadResolutionError, callables_mod.f, 4, 5)
         self.assertRaises(bp3.OverloadResolutionError, callables_mod.f, 5, b=4)
+
+    def testExceptions(self):
+        self.assertRaises(bp3.UnknownError, callables_mod.f5, 0)
 
 if __name__ == "__main__":
     unittest.main()

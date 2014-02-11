@@ -8,8 +8,6 @@ Plan for docs: use Sphinx + libclang bindings to autogenerate from C++ reStructu
 
 Should have a way of distinguishing between headers needed to build against bp3 and headers needed only to build bp3
 
-exception_access should be CamelCase
-
 consider changing naming conventions for builtin wrappers
 
 make sure Module::import is a no-op if repeated

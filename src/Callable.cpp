@@ -33,7 +33,7 @@ private:
 ::PyObject * CallableImpl::call(::PyObject * self, ::PyObject * args, ::PyObject * kwds) {
     try {
         if (self->ob_type != &CallableImpl::type) {
-            builtin::TypeError::raise("First argument must be a bp3.Callable instance");
+            FromPythonTypeError::raise("First argument must be a bp3.Callable instance");
         }
         CallableImpl * impl = static_cast<CallableImpl*>(self);
         if (impl->_overloads.size() == static_cast<std::size_t>(1)) {
@@ -45,7 +45,7 @@ private:
                 std::ostringstream msg;
                 msg << "Error in arguments for '" << impl->_name << "'";
                 data.converted_args->reportConversionFailure(msg, "\n  ");
-                builtin::TypeError::raise(msg.str());
+                FromPythonTypeError::raise(msg.str());
             }
             return data.overload->call(impl->_registry, data).release();
         } else {
@@ -67,8 +67,8 @@ private:
                 // TODO: save non-matches in so we can use them for diagnostics if nothing succeeds
             }
             if (data.empty()) {
-                builtin::TypeError::raise("No matching signatures for call to overloaded function '"
-                                          + impl->_name + "'");
+                FromPythonTypeError::raise("No matching signatures for call to overloaded function '"
+                                           + impl->_name + "'");
             }
             for (DataList::iterator i = data.begin(); i != data.end(); ) {
                 // given the current overload i, see if it is strictly better than the current winner(s) j
@@ -97,7 +97,7 @@ private:
         err.release();
         return nullptr;
     } catch (...) {
-        PyErr_SetString(PyExc_RuntimeError, "unknown C++ exception");
+        PyErr_SetString(UnknownError::typeobject().ptr().get(), "unknown C++ exception");
         return nullptr;
     }
 }
