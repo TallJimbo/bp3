@@ -11,3 +11,7 @@ Should have a way of distinguishing between headers needed to build against bp3 
 consider changing naming conventions for builtin wrappers
 
 make sure Module::import is a no-op if repeated
+
+From-Python, To-Python converters for builtins, C++ std exceptions
+
+Catch and convert C++ std exceptions

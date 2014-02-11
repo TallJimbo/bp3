@@ -71,4 +71,5 @@ add_library(bp3 ${LIBRARY_TYPE}
 )
 
 add_subdirectory(python/bp3)
+add_subdirectory(python/bp3/std)
 add_subdirectory(tests)
