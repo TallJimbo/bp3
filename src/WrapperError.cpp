@@ -14,69 +14,22 @@ namespace {
 
 } // anonymous
 
+#define BP3_WRAPPER_ERROR_IMPL(NAME)            \
+    void NAME::raise(std::string const & what) {                \
+        PyErr_SetString(typeobject().ptr().get(), what.c_str());    \
+        detail::ExceptionAccess::fetch_and_throw<NAME>();           \
+    }                                                               \
+    builtin::type NAME::typeobject() {                              \
+        static ::PyObject * t = getTypeFromModule(#NAME);  \
+        return builtin::type(PyPtr::borrow(t));                     \
+    }
 
-void WrapperError::raise(std::string const & what) {
-    PyErr_SetString(typeobject().ptr().get(), what.c_str());
-    detail::ExceptionAccess::fetch_and_throw<WrapperError>();
-}
+BP3_WRAPPER_ERROR_IMPL(WrapperError)
+BP3_WRAPPER_ERROR_IMPL(OverloadResolutionError)
+BP3_WRAPPER_ERROR_IMPL(SignatureError)
+BP3_WRAPPER_ERROR_IMPL(FromPythonTypeError)
+BP3_WRAPPER_ERROR_IMPL(UnknownError)
 
-builtin::type WrapperError::typeobject() {
-    static ::PyObject * t = getTypeFromModule("WrapperError");
-    // We don't want a destructor to run after Python has shut down, so we have an extra refcount here
-    // for the static raw pointer.
-    return builtin::type(PyPtr::borrow(t));
-}
-
-
-void OverloadResolutionError::raise(std::string const & what) {
-    PyErr_SetString(typeobject().ptr().get(), what.c_str());
-    detail::ExceptionAccess::fetch_and_throw<OverloadResolutionError>();
-}
-
-builtin::type OverloadResolutionError::typeobject() {
-    static ::PyObject * t = getTypeFromModule("OverloadResolutionError");
-    // We don't want a destructor to run after Python has shut down, so we have an extra refcount here
-    // for the static raw pointer.
-    return builtin::type(PyPtr::borrow(t));
-}
-
-
-void FromPythonTypeError::raise(std::string const & what) {
-    PyErr_SetString(typeobject().ptr().get(), what.c_str());
-    detail::ExceptionAccess::fetch_and_throw<FromPythonTypeError>();
-}
-
-builtin::type FromPythonTypeError::typeobject() {
-    static ::PyObject * t = getTypeFromModule("FromPythonTypeError");
-    // We don't want a destructor to run after Python has shut down, so we have an extra refcount here
-    // for the static raw pointer.
-    return builtin::type(PyPtr::borrow(t));
-}
-
-
-void SignatureError::raise(std::string const & what) {
-    PyErr_SetString(typeobject().ptr().get(), what.c_str());
-    detail::ExceptionAccess::fetch_and_throw<SignatureError>();
-}
-
-builtin::type SignatureError::typeobject() {
-    static ::PyObject * t = getTypeFromModule("SignatureError");
-    // We don't want a destructor to run after Python has shut down, so we have an extra refcount here
-    // for the static raw pointer.
-    return builtin::type(PyPtr::borrow(t));
-}
-
-
-void UnknownError::raise(std::string const & what) {
-    PyErr_SetString(typeobject().ptr().get(), what.c_str());
-    detail::ExceptionAccess::fetch_and_throw<UnknownError>();
-}
-
-builtin::type UnknownError::typeobject() {
-    static ::PyObject * t = getTypeFromModule("UnknownError");
-    // We don't want a destructor to run after Python has shut down, so we have an extra refcount here
-    // for the static raw pointer.
-    return builtin::type(PyPtr::borrow(t));
-}
+#undef BP3_WRAPPER_ERROR_IMPL
 
 } // namespace bp3

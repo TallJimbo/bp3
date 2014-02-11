@@ -22,73 +22,23 @@ protected:
 
 };
 
-class OverloadResolutionError : public WrapperError {
-public:
+#define BP3_DECLARE_WRAPPER_ERROR_DERIVED(NAME)                         \
+    class NAME : public WrapperError {                                  \
+    public:                                                             \
+        NAME(NAME const & other) : WrapperError(other) {}               \
+        static builtin::type typeobject();                              \
+        static void raise(std::string const & what);                    \
+    protected:                                                          \
+        friend class detail::ExceptionAccess;                           \
+        NAME(PyPtr const & value, PyPtr const & traceback) : WrapperError(value, traceback) {} \
+    }
 
-    OverloadResolutionError(OverloadResolutionError const & other) : WrapperError(other) {}
+BP3_DECLARE_WRAPPER_ERROR_DERIVED(OverloadResolutionError);
+BP3_DECLARE_WRAPPER_ERROR_DERIVED(SignatureError);
+BP3_DECLARE_WRAPPER_ERROR_DERIVED(FromPythonTypeError);
+BP3_DECLARE_WRAPPER_ERROR_DERIVED(UnknownError);
 
-    static builtin::type typeobject();
-
-    static void raise(std::string const & what);
-
-protected:
-
-    friend class detail::ExceptionAccess;
-
-    OverloadResolutionError(PyPtr const & value, PyPtr const & traceback) : WrapperError(value, traceback) {}
-
-};
-
-class SignatureError : public WrapperError {
-public:
-
-    SignatureError(SignatureError const & other) : WrapperError(other) {}
-
-    static builtin::type typeobject();
-
-    static void raise(std::string const & what);
-
-protected:
-
-    friend class detail::ExceptionAccess;
-
-    SignatureError(PyPtr const & value, PyPtr const & traceback) : WrapperError(value, traceback) {}
-
-};
-
-class FromPythonTypeError : public WrapperError {
-public:
-
-    FromPythonTypeError(FromPythonTypeError const & other) : WrapperError(other) {}
-
-    static builtin::type typeobject();
-
-    static void raise(std::string const & what);
-
-protected:
-
-    friend class detail::ExceptionAccess;
-
-    FromPythonTypeError(PyPtr const & value, PyPtr const & traceback) : WrapperError(value, traceback) {}
-
-};
-
-class UnknownError : public WrapperError {
-public:
-
-    UnknownError(UnknownError const & other) : WrapperError(other) {}
-
-    static builtin::type typeobject();
-
-    static void raise(std::string const & what);
-
-protected:
-
-    friend class detail::ExceptionAccess;
-
-    UnknownError(PyPtr const & value, PyPtr const & traceback) : WrapperError(value, traceback) {}
-
-};
+#undef BP3_DECLARE_WRAPPER_ERROR_DERIVED
 
 } // namespace bp3
 
